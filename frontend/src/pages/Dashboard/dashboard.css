@@ -878,7 +878,7 @@
 }
 
 .booking-block-text {
-  flex-content: 1;
+  flex-grow: 1;
 }
 
 /* Bottom Book a Slot button row */
@@ -1071,243 +1071,214 @@
 }
 
 /* ==========================================================================
-   Screen 9 - Reports & Analytics Styles
+   Screen 5 - Allocation & Transfer Styles
    ========================================================================== */
 
-.reports-view-container {
+.transfer-view-container {
   max-width: 900px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   animation: fade-in-up-org 0.4s ease-out;
 }
 
-.reports-charts-row-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .reports-charts-row-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.report-chart-card {
-  background: #ffffff;
-  border: 1.5px solid var(--border-color);
+.transfer-blocked-alert {
+  background-color: var(--red-bg);
+  border: 1.5px solid var(--red-border);
   border-radius: var(--border-radius);
   padding: 16px;
-  box-shadow: var(--box-shadow);
+  color: var(--red-text);
+  margin-bottom: 8px;
+  text-align: left;
 }
 
-.report-chart-title {
-  font-size: 14px;
+.transfer-blocked-alert-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-bottom: 2px;
+}
+
+.transfer-blocked-alert-body {
+  font-size: 13.5px;
+}
+
+.transfer-section-title {
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-main);
   margin-bottom: 12px;
+  text-align: left;
 }
 
-.report-chart-svg-wrapper {
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #f1f5f9;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.report-vector-svg {
-  width: 100%;
-  height: auto;
-  max-height: 120px;
-}
-
-/* Animated utilization bars */
-.animated-bar-1, .animated-bar-2, .animated-bar-3, .animated-bar-4, .animated-bar-5 {
-  transform-origin: bottom;
-  transition: var(--transition);
-  cursor: pointer;
-}
-.animated-bar-1:hover, .animated-bar-2:hover, .animated-bar-3:hover, .animated-bar-4:hover, .animated-bar-5:hover {
-  fill: #70ad47;
-}
-
-/* Metrics Side by side columns */
-.reports-lists-flex-row {
-  display: flex;
+.transfer-grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
-  .reports-lists-flex-row {
-    flex-direction: column;
-  }
-}
-
-.report-metrics-list-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.report-metrics-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.report-metrics-content-box {
-  background: #ffffff;
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 16px;
-  box-shadow: var(--box-shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.report-metrics-item-line {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.item-badge {
-  display: inline-block;
-  padding: 2.5px 8px;
-  font-size: 10px;
-  font-weight: 700;
+.transfer-submit-btn {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+  padding: 8px 24px;
   border-radius: 6px;
-  letter-spacing: 0.3px;
-  min-width: 65px;
-  text-align: center;
-}
-
-.item-badge.primary {
-  background: var(--blue-bg);
-  color: var(--blue-text);
-  border: 1px solid var(--blue-border);
-}
-
-.item-badge.warning {
-  background: var(--orange-bg);
-  color: var(--orange-text);
-  border: 1px solid var(--orange-border);
-}
-
-.item-text-detail {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--text-main);
-}
-
-.reports-divider-line {
-  border-top: 1.5px solid var(--border-color);
-  margin-top: 8px;
-}
-
-/* Maintenance and Retirement Section */
-.retirement-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.retirement-title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-main);
-}
-
-.retirement-content-box {
-  background: #ffffff;
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 16px;
-  box-shadow: var(--box-shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.retirement-item-line {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.retirement-warn-icon {
-  color: #ea580c;
-  flex-shrink: 0;
-}
-
-.retirement-text-detail {
-  font-size: 13.5px;
-  color: var(--text-main);
-}
-
-/* Action button at bottom */
-.reports-footer-action-row {
-  display: flex;
-  margin-top: 8px;
-}
-
-/* Styled export report button (dark background/border) */
-.reports-primary-action-btn {
-  background: #3e322a; /* Dark charcoal/brown matching wireframe and top box */
-  border: 1.5px solid #5c4a3e;
-  color: #ffffff;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 700;
-  border-radius: 8px;
   cursor: pointer;
   font-family: var(--font-family);
   transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.transfer-submit-btn:hover {
+  background: #d4e8c8;
+}
+
+.history-section-wire {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.history-section-wire h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.history-divider {
+  border-top: 1.5px solid var(--border-color);
+  margin: 10px 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  list-style: none;
+  padding: 0;
 }
 
-.reports-primary-action-btn:hover:not(:disabled) {
-  background: #2e241e;
+.history-item {
+  font-size: 13.5px;
+  color: var(--text-main);
+  line-height: 1.5;
 }
 
-.reports-primary-action-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+/* ==========================================================================
+   Screen 10 - Activity logs & Notifications Styles
+   ========================================================================== */
+
+.notifications-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-in-up-org 0.4s ease-out;
 }
 
-.spinner-icon-animate {
-  animation: spin 1s linear infinite;
+.notif-filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.notif-filter-btn {
+  background: transparent;
+  border: 1.5px solid var(--border-color);
+  border-radius: 18px;
+  padding: 6px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-family);
 }
 
-/* Export success message alert banner */
-.export-success-banner-alert {
-  background: var(--green-bg);
-  border: 1.5px solid var(--green-border);
+.notif-filter-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.notif-filter-btn.active {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+}
+
+.notifications-list-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: 12px 18px;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notification-row-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: var(--green-text);
-  font-size: 13.5px;
-  font-weight: 600;
-  animation: fade-in-up-org 0.3s ease-out;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: var(--transition);
 }
 
-.export-success-icon {
-  color: var(--success-color);
+.notification-row-item:last-child {
+  border-bottom: none;
 }
+
+.notification-row-item:hover {
+  background: #f8fafc;
+}
+
+.notification-left-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.notification-check-box {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.notification-status-color-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.notification-message-text {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.notification-message-text.read {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.notification-right-block {
+  display: flex;
+  align-items: center;
+}
+
+.notification-relative-time {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+
