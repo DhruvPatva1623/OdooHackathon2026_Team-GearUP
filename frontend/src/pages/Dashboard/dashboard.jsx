@@ -54,7 +54,19 @@ export default function Dashboard({ user, onLogout }) {
   const [exportingReport, setExportingReport] = useState(false)
   const [exportSuccess, setExportSuccess] = useState(false)
 
-  // Asset history state map
+  // Screen 7 Maintenance Kanban state
+  const KANBAN_COLUMNS = ['Pending', 'Approved', 'Technician assigned', 'In progress', 'Resolved']
+  const [kanbanCards, setKanbanCards] = useState([
+    { id: 'AF-0062', desc: 'Projector bulb not turning on', column: 'Pending' },
+    { id: 'AF-003',  desc: 'ac unit noisy compressor', column: 'Approved' },
+    { id: 'AF-0078', desc: 'forklift tech: R varma', column: 'Technician assigned' },
+    { id: 'AF-897',  desc: 'Printer Jam parts ordered', column: 'In progress' },
+    { id: 'AF-873',  desc: 'Chair repair resolved 7 Jul', column: 'Resolved' }
+  ])
+  const [showAddMaintenanceModal, setShowAddMaintenanceModal] = useState(false)
+  const [newMaintenanceId, setNewMaintenanceId] = useState('')
+  const [newMaintenanceDesc, setNewMaintenanceDesc] = useState('')
+
   const [histories, setHistories] = useState({
     'AF-0114 - Dell laptop': [
       { date: 'Mar 12', desc: 'Allocated to Priya shah - Engineering' },
@@ -444,6 +456,32 @@ export default function Dashboard({ user, onLogout }) {
       setActivities(prev => [newAct, ...prev])
       setTimeout(() => setExportSuccess(false), 4000)
     }, 2000)
+  }
+
+  // Handle kanban card column advance
+  const handleKanbanAdvance = (cardId) => {
+    setKanbanCards(prev => prev.map(card => {
+      if (card.id !== cardId) return card
+      const idx = KANBAN_COLUMNS.indexOf(card.column)
+      if (idx < KANBAN_COLUMNS.length - 1) {
+        const nextCol = KANBAN_COLUMNS[idx + 1]
+        // When moving to Resolved, mark asset as available
+        if (nextCol === 'Resolved') {
+          setActivities(a => [{ id: Date.now(), text: `${cardId} maintenance resolved - returned to available`, time: 'Just now', type: 'booking' }, ...a])
+        }
+        return { ...card, column: nextCol }
+      }
+      return card
+    }))
+  }
+
+  const handleAddMaintenanceCard = (e) => {
+    e.preventDefault()
+    if (!newMaintenanceId || !newMaintenanceDesc) return
+    setKanbanCards(prev => [...prev, { id: newMaintenanceId, desc: newMaintenanceDesc, column: 'Pending' }])
+    setNewMaintenanceId('')
+    setNewMaintenanceDesc('')
+    setShowAddMaintenanceModal(false)
   }
 
   // Handle close audit cycle
@@ -964,6 +1002,51 @@ export default function Dashboard({ user, onLogout }) {
                 </ul>
               </section>
             </div>
+          ) : activeMenu === 'Maintenance' ? (
+            <div className="maintenance-kanban-container">
+              {/* Top action row */}
+              <div className="kanban-top-action-row">
+                <button className="kanban-add-card-btn" onClick={() => setShowAddMaintenanceModal(true)}>
+                  + Raise maintenance request
+                </button>
+              </div>
+
+              {/* 5-Column Kanban Board */}
+              <div className="kanban-board-grid">
+                {KANBAN_COLUMNS.map(col => (
+                  <div key={col} className={`kanban-column ${col === 'Resolved' ? 'resolved-col' : ''}`}>
+                    <div className="kanban-col-header">{col}</div>
+                    <div className="kanban-col-body">
+                      {kanbanCards
+                        .filter(card => card.column === col)
+                        .map(card => (
+                          <div key={card.id} className={`kanban-card ${col === 'Resolved' ? 'resolved-card' : ''}`}>
+                            <div className="kanban-card-id">{card.id}</div>
+                            <div className="kanban-card-desc">{card.desc}</div>
+                            {col !== 'Resolved' && (
+                              <button
+                                className="kanban-advance-btn"
+                                onClick={() => handleKanbanAdvance(card.id)}
+                                title={`Move to: ${KANBAN_COLUMNS[KANBAN_COLUMNS.indexOf(col) + 1]}`}
+                              >
+                                {col === 'Pending' ? 'Approve →' :
+                                 col === 'Approved' ? 'Assign →' :
+                                 col === 'Technician assigned' ? 'Start →' :
+                                 'Resolve ✓'}
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer note matching wireframe */}
+              <div className="kanban-footer-note">
+                Approving a card moves the asset to under maintenance, resolving return it to available
+              </div>
+            </div>
           ) : activeMenu === 'Audit' ? (
             <div className="audit-view-container">
               {/* Q3 audit cycle info box matching Screen 8 */}
@@ -1477,6 +1560,46 @@ export default function Dashboard({ user, onLogout }) {
               <div className="modal-actions-wire">
                 <button type="button" className="modal-btn-cancel" onClick={() => setShowNewBookingModal(false)}>Cancel</button>
                 <button type="submit" className="modal-btn-submit">Confirm Slot</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Raise Maintenance Request Modal */}
+      {showAddMaintenanceModal && (
+        <div className="modal-overlay-wire">
+          <div className="modal-card-wire">
+            <div className="modal-header-wire">
+              <h3>Raise Maintenance Request</h3>
+              <button className="modal-close-wire" onClick={() => setShowAddMaintenanceModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleAddMaintenanceCard} className="modal-form-wire">
+              <div className="form-group-wire">
+                <label>Asset ID / Tag</label>
+                <input
+                  type="text"
+                  placeholder="e.g. AF-0212"
+                  value={newMaintenanceId}
+                  onChange={(e) => setNewMaintenanceId(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group-wire">
+                <label>Issue Description</label>
+                <textarea
+                  rows="3"
+                  placeholder="e.g. Screen flickering, fan noise, power issue..."
+                  value={newMaintenanceDesc}
+                  onChange={(e) => setNewMaintenanceDesc(e.target.value)}
+                  required
+                ></textarea>
+              </div>
+              <div className="modal-actions-wire">
+                <button type="button" className="modal-btn-cancel" onClick={() => setShowAddMaintenanceModal(false)}>Cancel</button>
+                <button type="submit" className="modal-btn-submit">Submit Request</button>
               </div>
             </form>
           </div>

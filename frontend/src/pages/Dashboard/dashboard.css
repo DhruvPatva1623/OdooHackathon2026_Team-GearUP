@@ -1315,3 +1315,163 @@
 .spinner-icon-animate { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .export-success-banner-alert { background: var(--green-bg); border: 1.5px solid var(--green-border); border-radius: var(--border-radius); padding: 12px 18px; display: flex; align-items: center; gap: 12px; color: var(--green-text); font-size: 13.5px; font-weight: 600; }
+
+/* ==========================================================================
+   Screen 7 - Maintenance Management Kanban Board Styles
+   ========================================================================== */
+
+.maintenance-kanban-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+.kanban-top-action-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.kanban-add-card-btn {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+
+.kanban-add-card-btn:hover {
+  background: #d4e8c8;
+}
+
+/* 5-column board grid */
+.kanban-board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  min-height: 320px;
+}
+
+@media (max-width: 900px) {
+  .kanban-board-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Each column */
+.kanban-column {
+  background: #f8fafc;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.kanban-column.resolved-col {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+/* Column header */
+.kanban-col-header {
+  background: #ffffff;
+  border-bottom: 1.5px solid var(--border-color);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+}
+
+.kanban-column.resolved-col .kanban-col-header {
+  background: #dcfce7;
+  border-bottom-color: #86efac;
+  color: #166534;
+}
+
+/* Column body */
+.kanban-col-body {
+  flex: 1;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Individual card */
+.kanban-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  transition: var(--transition);
+  cursor: default;
+}
+
+.kanban-card:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Resolved card gets green accent */
+.kanban-card.resolved-card {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.kanban-card-id {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.2px;
+}
+
+.kanban-card-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Card advance button */
+.kanban-advance-btn {
+  margin-top: 6px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1.5px solid #70ad47;
+  background: #e2f0d9;
+  color: #385723;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+  width: 100%;
+  text-align: center;
+}
+
+.kanban-advance-btn:hover {
+  background: #d4e8c8;
+}
+
+/* Footer note matching wireframe */
+.kanban-footer-note {
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 12px 0 4px;
+  border-top: 1.5px solid var(--border-color);
+  text-align: center;
+}
