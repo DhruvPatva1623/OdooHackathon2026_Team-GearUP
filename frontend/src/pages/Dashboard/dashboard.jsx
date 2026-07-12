@@ -530,6 +530,24 @@ export default function Dashboard({ user, onLogout }) {
     setActivities([newAct, ...activities])
   }
 
+  // Handle export report simulation
+  const handleExportReportAction = () => {
+    setExportingReport(true)
+    setExportSuccess(false)
+    setTimeout(() => {
+      setExportingReport(false)
+      setExportSuccess(true)
+      const newAct = {
+        id: Date.now(),
+        text: `Exported system reports: utilization and maintenance audit.pdf`,
+        time: 'Just now',
+        type: 'allocation'
+      }
+      setActivities(prev => [newAct, ...prev])
+      setTimeout(() => setExportSuccess(false), 4000)
+    }, 2000)
+  }
+
   // Screen 7 Maintenance Kanban Handlers
   const handleKanbanAdvance = (cardId) => {
     setKanbanCards(kanbanCards.map(card => {
@@ -923,6 +941,101 @@ export default function Dashboard({ user, onLogout }) {
               <p className="org-setup-footer-note">
                 Editing a department here also drives the picklist in Screen 4 & 5
               </p>
+            </div>
+          ) : activeMenu === 'Assets' ? (
+            <div className="assets-view-container">
+              {/* Top controls: Search and Register Asset button */}
+              <div className="assets-top-action-bar">
+                <input
+                  type="text"
+                  className="assets-search-input"
+                  placeholder="Search by tag, name, or location.."
+                  value={assetSearchQuery}
+                  onChange={(e) => setAssetSearchQuery(e.target.value)}
+                />
+                <button
+                  className="assets-register-trigger-btn"
+                  onClick={() => setShowRegisterModal(true)}
+                >
+                  + Register Asset
+                </button>
+              </div>
+
+              {/* Filter controls row */}
+              <div className="assets-filters-bar">
+                <select
+                  className="assets-filter-select"
+                  value={assetCategoryFilter}
+                  onChange={(e) => setAssetCategoryFilter(e.target.value)}
+                >
+                  <option value="All">Category</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Furniture">Furniture</option>
+                </select>
+
+                <select
+                  className="assets-filter-select"
+                  value={assetStatusFilter}
+                  onChange={(e) => setAssetStatusFilter(e.target.value)}
+                >
+                  <option value="All">Status</option>
+                  <option value="Available">Available</option>
+                  <option value="Allocated">Allocated</option>
+                  <option value="Maintenance">Maintenance</option>
+                </select>
+
+                <select
+                  className="assets-filter-select"
+                  value={assetDeptFilter}
+                  onChange={(e) => setAssetDeptFilter(e.target.value)}
+                >
+                  <option value="All">Department</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Facilities">Facilities</option>
+                  <option value="IT Operations">IT Operations</option>
+                </select>
+              </div>
+
+              {/* Asset Directory Table */}
+              <div className="assets-table-responsive-wrapper">
+                <table className="assets-data-table-wire">
+                  <thead>
+                    <tr>
+                      <th>Tag</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assetsList
+                      .filter(asset => {
+                        const matchesSearch = 
+                          asset.tag.toLowerCase().includes(assetSearchQuery.toLowerCase()) ||
+                          asset.name.toLowerCase().includes(assetSearchQuery.toLowerCase()) ||
+                          asset.location.toLowerCase().includes(assetSearchQuery.toLowerCase());
+                        const matchesCategory = assetCategoryFilter === 'All' || asset.category === assetCategoryFilter;
+                        const matchesStatus = assetStatusFilter === 'All' || asset.status === assetStatusFilter;
+                        const matchesDept = assetDeptFilter === 'All' || asset.dept === assetDeptFilter;
+                        return matchesSearch && matchesCategory && matchesStatus && matchesDept;
+                      })
+                      .map((asset, index) => (
+                        <tr key={index}>
+                          <td className="font-semibold-wire">{asset.tag}</td>
+                          <td>{asset.name}</td>
+                          <td className="text-muted-wire">{asset.category}</td>
+                          <td>
+                            <span className={`org-status-oval ${asset.status.toLowerCase()}`}>
+                              {asset.status}
+                            </span>
+                          </td>
+                          <td className="text-muted-wire">{asset.location}</td>
+                        </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : activeMenu === 'Resource Booking' ? (
             <div className="resource-booking-view-container">

@@ -64,17 +64,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'assetflow_backend.wsgi.application'
 
-# Database Configuration - Primary MySQL with SQLite fallback
-# You can override this configuration using environment variables or MySQL Workbench
-DB_NAME = os.getenv('DB_NAME', 'assetflow_db')
-DB_USER = os.getenv('DB_USER', 'root')
-DB_PASSWORD = os.getenv('DB_PASSWORD', '') # Empty string by default or update as needed
-DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
-DB_PORT = os.getenv('DB_PORT', '3306')
+# Database Configuration - Defaults to SQLite, uses MySQL if USE_MYSQL environment variable is True
+USE_MYSQL = os.getenv('USE_MYSQL', 'False') == 'True'
 
-try:
-    # Try importing mysqlclient driver to see if it is installed
-    import MySQLdb # noqa: F401
+if USE_MYSQL:
+    DB_NAME = os.getenv('DB_NAME', 'assetflow_db')
+    DB_USER = os.getenv('DB_USER', 'root')
+    DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+    DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
+    DB_PORT = os.getenv('DB_PORT', '3306')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -88,8 +86,7 @@ try:
             }
         }
     }
-except ImportError:
-    # Fallback to local sqlite if mysqlclient is not installed
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
