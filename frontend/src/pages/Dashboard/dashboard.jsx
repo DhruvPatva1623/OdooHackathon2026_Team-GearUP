@@ -643,6 +643,81 @@ export default function Dashboard({ user, onLogout }) {
     setShowNewBookingModal(false)
   }
 
+  // Toggle Verification status for interactive checklist
+  const handleToggleVerification = (id) => {
+    if (auditCycleClosed) return
+    setAuditAssets(auditAssets.map(asset => {
+      if (asset.id === id) {
+        let nextStatus = 'Verified'
+        if (asset.verification === 'Verified') nextStatus = 'Missing'
+        else if (asset.verification === 'Missing') nextStatus = 'Damaged'
+        return { ...asset, verification: nextStatus }
+      }
+      return asset
+    }))
+  }
+
+  // Calculate discrepancy count
+  const discrepancyCount = auditAssets.filter(
+    a => a.verification === 'Missing' || a.verification === 'Damaged'
+  ).length
+
+  // Handle export report simulation
+  const handleExportReportAction = () => {
+    setExportingReport(true)
+    setExportSuccess(false)
+    setTimeout(() => {
+      setExportingReport(false)
+      setExportSuccess(true)
+      const newAct = {
+        id: Date.now(),
+        text: `Exported system reports: utilization and maintenance audit.pdf`,
+        time: 'Just now',
+        type: 'allocation'
+      }
+      setActivities(prev => [newAct, ...prev])
+      setTimeout(() => setExportSuccess(false), 4000)
+    }, 2000)
+  }
+
+  // Handle kanban card column advance
+  const handleKanbanAdvance = (cardId) => {
+    setKanbanCards(prev => prev.map(card => {
+      if (card.id !== cardId) return card
+      const idx = KANBAN_COLUMNS.indexOf(card.column)
+      if (idx < KANBAN_COLUMNS.length - 1) {
+        const nextCol = KANBAN_COLUMNS[idx + 1]
+        // When moving to Resolved, mark asset as available
+        if (nextCol === 'Resolved') {
+          setActivities(a => [{ id: Date.now(), text: `${cardId} maintenance resolved - returned to available`, time: 'Just now', type: 'booking' }, ...a])
+        }
+        return { ...card, column: nextCol }
+      }
+      return card
+    }))
+  }
+
+  const handleAddMaintenanceCard = (e) => {
+    e.preventDefault()
+    if (!newMaintenanceId || !newMaintenanceDesc) return
+    setKanbanCards(prev => [...prev, { id: newMaintenanceId, desc: newMaintenanceDesc, column: 'Pending' }])
+    setNewMaintenanceId('')
+    setNewMaintenanceDesc('')
+    setShowAddMaintenanceModal(false)
+  }
+
+  // Handle close audit cycle
+  const handleCloseAuditCycle = () => {
+    setAuditCycleClosed(true)
+    const newAct = {
+      id: Date.now(),
+      text: `Q3 Audit Cycle Closed with ${discrepancyCount} discrepancies flagged`,
+      time: 'Just now',
+      type: 'maintenance'
+    }
+    setActivities([newAct, ...activities])
+  }
+
   // Menu items matching the wireframe
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
@@ -1139,6 +1214,101 @@ export default function Dashboard({ user, onLogout }) {
                 >
                   Book a slot
                 </button>
+              </div>
+            </div>
+          ) : activeMenu === 'Assets' ? (
+            <div className="assets-view-container">
+              {/* Top controls: Search and Register Asset button */}
+              <div className="assets-top-action-bar">
+                <input
+                  type="text"
+                  className="assets-search-input"
+                  placeholder="Search by tag, serial, or QR code.."
+                  value={assetSearchQuery}
+                  onChange={(e) => setAssetSearchQuery(e.target.value)}
+                />
+                <button
+                  className="assets-register-trigger-btn"
+                  onClick={() => setShowRegisterModal(true)}
+                >
+                  + Register Asset
+                </button>
+              </div>
+
+              {/* Filter controls row */}
+              <div className="assets-filters-bar">
+                <select
+                  className="assets-filter-select"
+                  value={assetCategoryFilter}
+                  onChange={(e) => setAssetCategoryFilter(e.target.value)}
+                >
+                  <option value="All">Category</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Furniture">Furniture</option>
+                </select>
+
+                <select
+                  className="assets-filter-select"
+                  value={assetStatusFilter}
+                  onChange={(e) => setAssetStatusFilter(e.target.value)}
+                >
+                  <option value="All">Status</option>
+                  <option value="Available">Available</option>
+                  <option value="Allocated">Allocated</option>
+                  <option value="Maintenance">Maintenance</option>
+                </select>
+
+                <select
+                  className="assets-filter-select"
+                  value={assetDeptFilter}
+                  onChange={(e) => setAssetDeptFilter(e.target.value)}
+                >
+                  <option value="All">Department</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Facilities">Facilities</option>
+                  <option value="IT Operations">IT Operations</option>
+                </select>
+              </div>
+
+              {/* Asset Directory Table */}
+              <div className="assets-table-responsive-wrapper">
+                <table className="assets-data-table-wire">
+                  <thead>
+                    <tr>
+                      <th>Tag</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assetsList
+                      .filter(asset => {
+                        const matchesSearch = 
+                          asset.tag.toLowerCase().includes(assetSearchQuery.toLowerCase()) ||
+                          asset.name.toLowerCase().includes(assetSearchQuery.toLowerCase()) ||
+                          asset.location.toLowerCase().includes(assetSearchQuery.toLowerCase());
+                        const matchesCategory = assetCategoryFilter === 'All' || asset.category === assetCategoryFilter;
+                        const matchesStatus = assetStatusFilter === 'All' || asset.status === assetStatusFilter;
+                        const matchesDept = assetDeptFilter === 'All' || asset.dept === assetDeptFilter;
+                        return matchesSearch && matchesCategory && matchesStatus && matchesDept;
+                      })
+                      .map((asset, index) => (
+                        <tr key={index}>
+                          <td className="font-semibold-wire">{asset.tag}</td>
+                          <td>{asset.name}</td>
+                          <td className="text-muted-wire">{asset.category}</td>
+                          <td>
+                            <span className={`org-status-oval ${asset.status.toLowerCase()}`}>
+                              {asset.status}
+                            </span>
+                          </td>
+                          <td className="text-muted-wire">{asset.location}</td>
+                        </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           ) : activeMenu === 'Allocation & Transfer' ? (
