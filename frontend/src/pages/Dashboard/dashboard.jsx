@@ -17,12 +17,13 @@ import {
   CheckCircle,
   X,
   Edit2,
-  Trash2
+  Trash2,
+  Clock
 } from 'lucide-react'
 import './dashboard.css'
 
 export default function Dashboard({ user, onLogout }) {
-  const [activeMenu, setActiveMenu] = useState('Organization setup')
+  const [activeMenu, setActiveMenu] = useState('Resource Booking')
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showRequestModal, setShowRequestModal] = useState(false)
@@ -31,6 +32,37 @@ export default function Dashboard({ user, onLogout }) {
   const [orgTab, setOrgTab] = useState('Departments')
   const [showAddOrgModal, setShowAddOrgModal] = useState(false)
   const [editingIndex, setEditingIndex] = useState(null) // null for adding, index for editing
+
+  // Resource Booking states
+  const [selectedResource, setSelectedResource] = useState('Conference room B2 - Tue, 7 Jul')
+  const [showNewBookingModal, setShowNewBookingModal] = useState(false)
+
+  // Booking list for the calendar timeline
+  const [bookings, setBookings] = useState([
+    {
+      id: 1,
+      resource: 'Conference room B2 - Tue, 7 Jul',
+      team: 'Procurement Team',
+      start: '9:00',
+      end: '10:00',
+      type: 'confirmed',
+      text: 'Booked - Procurement Team - 9 to 10'
+    },
+    {
+      id: 2,
+      resource: 'Conference room B2 - Tue, 7 Jul',
+      team: 'Engineering Team',
+      start: '9:30',
+      end: '10:30',
+      type: 'conflict',
+      text: 'Requested 9:30 to 10:30 - conflict - slot is unavailable'
+    }
+  ])
+
+  // New booking form fields
+  const [bookingStartTime, setBookingStartTime] = useState('11:00')
+  const [bookingEndTime, setBookingEndTime] = useState('12:00')
+  const [bookingTeamName, setBookingTeamName] = useState('Operations Team')
 
   // Dynamic stats state
   const [stats, setStats] = useState({
@@ -235,6 +267,44 @@ export default function Dashboard({ user, onLogout }) {
       }
     }
     setShowAddOrgModal(false)
+  }
+
+  // Handle timeline slot booking
+  const handleCreateTimelineBooking = (e) => {
+    e.preventDefault()
+    
+    // Check for conflict with 9:00-10:00 slot
+    const hasConflict = 
+      (bookingStartTime >= '09:00' && bookingStartTime < '10:00') ||
+      (bookingEndTime > '09:00' && bookingEndTime <= '10:00') ||
+      (bookingStartTime <= '09:00' && bookingEndTime >= '10:00');
+
+    const newBooking = {
+      id: Date.now(),
+      resource: selectedResource,
+      team: bookingTeamName,
+      start: bookingStartTime,
+      end: bookingEndTime,
+      type: hasConflict ? 'conflict' : 'confirmed',
+      text: hasConflict 
+        ? `Requested ${bookingStartTime} to ${bookingEndTime} - conflict - slot is unavailable`
+        : `Booked - ${bookingTeamName} - ${bookingStartTime.replace(':00', '')} to ${bookingEndTime.replace(':00', '')}`
+    }
+
+    setBookings([...bookings, newBooking])
+    
+    // Add to activity feed
+    const newAct = {
+      id: Date.now(),
+      text: hasConflict
+        ? `Booking conflict detected for ${bookingStartTime} to ${bookingEndTime}`
+        : `Resource booking confirmed for ${bookingTeamName}`,
+      time: 'Just now',
+      type: hasConflict ? 'maintenance' : 'booking'
+    }
+    setActivities([newAct, ...activities])
+
+    setShowNewBookingModal(false)
   }
 
   // Menu items matching the wireframe
@@ -536,6 +606,111 @@ export default function Dashboard({ user, onLogout }) {
                 Editing a department here also drives the picklist in Screen 4 & 5
               </p>
             </div>
+          ) : activeMenu === 'Resource Booking' ? (
+            <div className="resource-booking-view-container">
+              {/* Resource Select dropdown matching slide 6 */}
+              <div className="booking-resource-picker-row">
+                <label className="booking-picker-label">Resource</label>
+                <div className="booking-select-wrapper">
+                  <select
+                    value={selectedResource}
+                    onChange={(e) => setSelectedResource(e.target.value)}
+                    className="booking-resource-select-box"
+                  >
+                    <option value="Conference room B2 - Tue, 7 Jul">Conference room B2 - Tue, 7 Jul</option>
+                    <option value="Server Room A - Tue, 7 Jul">Server Room A - Tue, 7 Jul</option>
+                    <option value="Projector AF-0062 - Tue, 7 Jul">Projector AF-0062 - Tue, 7 Jul</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Schedule Timeline Grid */}
+              <div className="booking-timeline-board">
+                
+                {/* 9:00 Slot Row */}
+                <div className="timeline-slot-row">
+                  <div className="timeline-hour-col">9:00</div>
+                  <div className="timeline-card-col">
+                    {bookings
+                      .filter(b => b.resource === selectedResource && b.start === '9:00' && b.type === 'confirmed')
+                      .map(b => (
+                        <div key={b.id} className="timeline-booking-block confirmed">
+                          <span className="booking-block-text">{b.text}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Overlapping Conflict Indicator (Dashed red box 9:30 to 10:30) */}
+                <div className="timeline-slot-row">
+                  <div className="timeline-hour-col">10:00</div>
+                  <div className="timeline-card-col relative-col">
+                    {/* The conflict box overlaps 9:30 to 10:30 */}
+                    {bookings
+                      .filter(b => b.resource === selectedResource && b.type === 'conflict')
+                      .map(b => (
+                        <div key={b.id} className="timeline-booking-block conflict-dashed">
+                          <AlertTriangle size={14} className="conflict-block-icon" />
+                          <span className="booking-block-text">{b.text}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* 11:00 Slot Row */}
+                <div className="timeline-slot-row">
+                  <div className="timeline-hour-col">11:00</div>
+                  <div className="timeline-card-col">
+                    {bookings
+                      .filter(b => b.resource === selectedResource && b.start === '11:00' && b.type === 'confirmed')
+                      .map(b => (
+                        <div key={b.id} className="timeline-booking-block confirmed">
+                          <span className="booking-block-text">{b.text}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* 12:00 Slot Row */}
+                <div className="timeline-slot-row">
+                  <div className="timeline-hour-col">12:00</div>
+                  <div className="timeline-card-col">
+                    {bookings
+                      .filter(b => b.resource === selectedResource && b.start === '12:00' && b.type === 'confirmed')
+                      .map(b => (
+                        <div key={b.id} className="timeline-booking-block confirmed">
+                          <span className="booking-block-text">{b.text}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* 1:00 Slot Row */}
+                <div className="timeline-slot-row">
+                  <div className="timeline-hour-col">1:00</div>
+                  <div className="timeline-card-col">
+                    {bookings
+                      .filter(b => b.resource === selectedResource && b.start === '13:00' && b.type === 'confirmed')
+                      .map(b => (
+                        <div key={b.id} className="timeline-booking-block confirmed">
+                          <span className="booking-block-text">{b.text}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Book a slot bottom action button */}
+              <div className="booking-footer-action-row">
+                <button
+                  className="booking-primary-action-btn"
+                  onClick={() => setShowNewBookingModal(true)}
+                >
+                  Book a slot
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="fallback-wire-container">
               <h2 className="fallback-wire-title">{activeMenu}</h2>
@@ -670,8 +845,6 @@ export default function Dashboard({ user, onLogout }) {
             </div>
             <form onSubmit={handleSaveOrg} className="modal-form-wire">
               
-              {/* Dynamic form fields depending on which Tab is active */}
-              
               {orgTab === 'Departments' && (
                 <>
                   <div className="form-group-wire">
@@ -794,6 +967,63 @@ export default function Dashboard({ user, onLogout }) {
                 <button type="submit" className="modal-btn-submit">
                   {editingIndex !== null ? 'Save Changes' : 'Create Entry'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* New Timeline Booking Modal */}
+      {showNewBookingModal && (
+        <div className="modal-overlay-wire">
+          <div className="modal-card-wire">
+            <div className="modal-header-wire">
+              <h3>Create Timeline Slot Booking</h3>
+              <button className="modal-close-wire" onClick={() => setShowNewBookingModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateTimelineBooking} className="modal-form-wire">
+              <div className="form-group-wire">
+                <label>Team Name</label>
+                <input 
+                  type="text" 
+                  value={bookingTeamName}
+                  onChange={(e) => setBookingTeamName(e.target.value)}
+                  required
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group-wire">
+                  <label>Start Hour</label>
+                  <select 
+                    value={bookingStartTime}
+                    onChange={(e) => setBookingStartTime(e.target.value)}
+                  >
+                    <option value="09:00">9:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">1:00 PM</option>
+                  </select>
+                </div>
+                <div className="form-group-wire">
+                  <label>End Hour</label>
+                  <select 
+                    value={bookingEndTime}
+                    onChange={(e) => setBookingEndTime(e.target.value)}
+                  >
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">1:00 PM</option>
+                    <option value="14:00">2:00 PM</option>
+                  </select>
+                </div>
+              </div>
+              <div className="modal-actions-wire">
+                <button type="button" className="modal-btn-cancel" onClick={() => setShowNewBookingModal(false)}>Cancel</button>
+                <button type="submit" className="modal-btn-submit">Confirm Slot</button>
               </div>
             </form>
           </div>

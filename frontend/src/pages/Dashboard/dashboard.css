@@ -16,7 +16,7 @@
   --blue-border: #93c5fd;
   --blue-text: #1e40af;
   
-  --red-bg: #fef2f2;
+  --red-bg: #fdf2f2;
   --red-border: #fca5a5;
   --red-text: #991b1b;
   
@@ -742,4 +742,165 @@
   color: var(--text-main);
   margin-top: 4px;
   font-weight: 500;
+}
+
+/* ==========================================================================
+   Screen 6 - Resource Booking Styles
+   ========================================================================== */
+
+.resource-booking-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+.booking-resource-picker-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-picker-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.booking-select-wrapper {
+  width: 100%;
+}
+
+.booking-resource-select-box {
+  width: 100%;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  background: #ffffff;
+  outline: none;
+  cursor: pointer;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+  font-family: var(--font-family);
+}
+
+.booking-resource-select-box:focus {
+  border-color: #70ad47;
+}
+
+/* Timeline grid board */
+.booking-timeline-board {
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: #ffffff;
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-slot-row {
+  display: flex;
+  border-bottom: 1px solid #f1f5f9;
+  min-height: 52px;
+}
+
+.timeline-slot-row:last-child {
+  border-bottom: none;
+}
+
+.timeline-hour-col {
+  width: 80px;
+  flex-shrink: 0;
+  border-right: 1.5px solid var(--border-color);
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-card-col {
+  flex: 1;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.timeline-card-col.relative-col {
+  position: relative;
+}
+
+/* Booking Blocks */
+.timeline-booking-block {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Solid blue block for Procurement team matching wireframe */
+.timeline-booking-block.confirmed {
+  background: #4472c4;
+  border: 1.5px solid #2f5597;
+  color: #ffffff;
+}
+
+/* Dashed red block for conflict */
+.timeline-booking-block.conflict-dashed {
+  background: #fff1f2;
+  border: 1.5px dashed #f43f5e;
+  color: #be123c;
+}
+
+.conflict-block-icon {
+  color: #f43f5e;
+  flex-shrink: 0;
+  animation: pulse-icon 2s infinite ease-in-out;
+}
+
+@keyframes pulse-icon {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.booking-block-text {
+  flex-content: 1;
+}
+
+/* Bottom Book a Slot button row */
+.booking-footer-action-row {
+  display: flex;
+  margin-top: 8px;
+}
+
+/* Book a slot shaded green matching wireframe */
+.booking-primary-action-btn {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+
+.booking-primary-action-btn:hover {
+  background: #d4e8c8;
 }
