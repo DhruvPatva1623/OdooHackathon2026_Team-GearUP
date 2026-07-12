@@ -20,12 +20,14 @@ import {
   Trash2,
   Clock,
   Check,
-  ClipboardList
+  ClipboardList,
+  Download,
+  Loader2
 } from 'lucide-react'
 import './dashboard.css'
 
 export default function Dashboard({ user, onLogout }) {
-  const [activeMenu, setActiveMenu] = useState('Audit')
+  const [activeMenu, setActiveMenu] = useState('Reports')
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showRequestModal, setShowRequestModal] = useState(false)
@@ -73,6 +75,10 @@ export default function Dashboard({ user, onLogout }) {
     { id: 'AF-9921', name: 'AF-9921 Office chair', location: 'Desk E14', verification: 'Missing' },
     { id: 'AF-9838', name: 'AF-9838 Monitor', location: 'Desk E15', verification: 'Damaged' }
   ])
+
+  // Screen 9 Reports states
+  const [exportingReport, setExportingReport] = useState(false)
+  const [exportSuccess, setExportSuccess] = useState(false)
 
   // Dynamic stats state
   const [stats, setStats] = useState({
@@ -341,6 +347,28 @@ export default function Dashboard({ user, onLogout }) {
       type: 'maintenance'
     }
     setActivities([newAct, ...activities])
+  }
+
+  // Handle export report simulation
+  const handleExportReportAction = () => {
+    setExportingReport(true)
+    setExportSuccess(false)
+    
+    setTimeout(() => {
+      setExportingReport(false)
+      setExportSuccess(true)
+      
+      const newAct = {
+        id: Date.now(),
+        text: `Exported system reports: utilization and maintenance audit.pdf`,
+        time: 'Just now',
+        type: 'allocation'
+      }
+      setActivities([newAct, ...activities])
+
+      // Clear success banner after 4s
+      setTimeout(() => setExportSuccess(false), 4000)
+    }, 2000)
   }
 
   // Menu items matching the wireframe
@@ -823,6 +851,141 @@ export default function Dashboard({ user, onLogout }) {
                   <span className="alert-banner-text">
                     Audit Cycle Closed Successfully - {discrepancyCount} discrepancies recorded in discrepancy report
                   </span>
+                </div>
+              )}
+
+            </div>
+          ) : activeMenu === 'Reports' ? (
+            <div className="reports-view-container">
+              {/* Row of Two Charts matching Screen 9 */}
+              <div className="reports-charts-row-grid">
+                
+                {/* Left Chart: Utilization by department */}
+                <div className="report-chart-card">
+                  <h4 className="report-chart-title">Utilization by department</h4>
+                  <div className="report-chart-svg-wrapper">
+                    <svg viewBox="0 0 240 120" className="report-vector-svg">
+                      {/* Grid baseline */}
+                      <line x1="20" y1="100" x2="220" y2="100" stroke="#cbd5e1" strokeWidth="1.2" />
+                      {/* Department Bars */}
+                      {/* Bar 1 */}
+                      <rect x="35" y="60" width="16" height="40" rx="3" fill="#3e322a" stroke="#5c4a3e" strokeWidth="1" className="animated-bar-1" />
+                      {/* Bar 2 */}
+                      <rect x="75" y="40" width="16" height="60" rx="3" fill="#3e322a" stroke="#5c4a3e" strokeWidth="1" className="animated-bar-2" />
+                      {/* Bar 3 */}
+                      <rect x="115" y="25" width="16" height="75" rx="3" fill="#3e322a" stroke="#5c4a3e" strokeWidth="1" className="animated-bar-3" />
+                      {/* Bar 4 */}
+                      <rect x="155" y="50" width="16" height="50" rx="3" fill="#3e322a" stroke="#5c4a3e" strokeWidth="1" className="animated-bar-4" />
+                      {/* Bar 5 */}
+                      <rect x="195" y="35" width="16" height="65" rx="3" fill="#3e322a" stroke="#5c4a3e" strokeWidth="1" className="animated-bar-5" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Right Chart: Maintenance Frequency */}
+                <div className="report-chart-card">
+                  <h4 className="report-chart-title">Maintenance Frequency</h4>
+                  <div className="report-chart-svg-wrapper">
+                    <svg viewBox="0 0 240 120" className="report-vector-svg">
+                      {/* Grid baseline */}
+                      <line x1="20" y1="100" x2="220" y2="100" stroke="#cbd5e1" strokeWidth="1.2" />
+                      {/* Rising line path matching wireframe */}
+                      <path d="M 30 95 L 65 65 L 100 70 L 135 50 L 170 70 L 205 35" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      {/* Area fill under path */}
+                      <path d="M 30 95 L 65 65 L 100 70 L 135 50 L 170 70 L 205 35 L 205 100 L 30 100 Z" fill="rgba(244, 63, 94, 0.08)" />
+                    </svg>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Lists Section: Most used and Idle assets */}
+              <div className="reports-lists-flex-row">
+                
+                {/* Most Used Assets Column */}
+                <div className="report-metrics-list-col">
+                  <h4 className="report-metrics-title">Most used assets</h4>
+                  <div className="report-metrics-content-box">
+                    <div className="report-metrics-item-line">
+                      <span className="item-badge primary">ROOM</span>
+                      <p className="item-text-detail">Room B2: 34 booking this month</p>
+                    </div>
+                    <div className="report-metrics-item-line">
+                      <span className="item-badge primary">VEHICLE</span>
+                      <p className="item-text-detail">Van AF-343: 21 trips this month</p>
+                    </div>
+                    <div className="report-metrics-item-line">
+                      <span className="item-badge primary">DEVICE</span>
+                      <p className="item-text-detail">Projector AF-335: 18 uses</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Idle Assets Column */}
+                <div className="report-metrics-list-col">
+                  <h4 className="report-metrics-title">Idle assets</h4>
+                  <div className="report-metrics-content-box">
+                    <div className="report-metrics-item-line">
+                      <span className="item-badge warning">60+ DAYS</span>
+                      <p className="item-text-detail">Camera AF-0301 : unused 60+ days</p>
+                    </div>
+                    <div className="report-metrics-item-line">
+                      <span className="item-badge warning">45 DAYS</span>
+                      <p className="item-text-detail">chair AF-0410 : unused 45 days</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Section Divider Line */}
+              <div className="reports-divider-line"></div>
+
+              {/* Maintenance & Retirement Section */}
+              <div className="retirement-section">
+                <h4 className="retirement-title">Assets due for maintenance / nearing retirement</h4>
+                <div className="retirement-content-box">
+                  <div className="retirement-item-line">
+                    <AlertTriangle size={15} className="retirement-warn-icon" />
+                    <p className="retirement-text-detail">
+                      <strong>Forklift AF-0087</strong> : service due in 5 days
+                    </p>
+                  </div>
+                  <div className="retirement-item-line">
+                    <AlertTriangle size={15} className="retirement-warn-icon" />
+                    <p className="retirement-text-detail">
+                      <strong>Laptop AF-0020</strong> : 4 years old : nearing retirement
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Export Report Action Row */}
+              <div className="reports-footer-action-row">
+                <button
+                  className="reports-primary-action-btn"
+                  onClick={handleExportReportAction}
+                  disabled={exportingReport}
+                >
+                  {exportingReport ? (
+                    <>
+                      <Loader2 size={16} className="spinner-icon-animate" />
+                      <span>Exporting PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download size={16} />
+                      <span>Export report</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Export Success Alert Banner */}
+              {exportSuccess && (
+                <div className="export-success-banner-alert">
+                  <CheckCircle size={18} className="export-success-icon" />
+                  <span>Report exported successfully! Downloaded: **utilization_and_maintenance_audit.pdf**</span>
                 </div>
               )}
 

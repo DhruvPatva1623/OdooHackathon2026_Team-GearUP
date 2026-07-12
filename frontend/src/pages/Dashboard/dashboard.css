@@ -1069,3 +1069,245 @@
 .audit-primary-action-btn:hover {
   background: #d4e8c8;
 }
+
+/* ==========================================================================
+   Screen 9 - Reports & Analytics Styles
+   ========================================================================== */
+
+.reports-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+.reports-charts-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .reports-charts-row-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.report-chart-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  box-shadow: var(--box-shadow);
+}
+
+.report-chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
+
+.report-chart-svg-wrapper {
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-vector-svg {
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+}
+
+/* Animated utilization bars */
+.animated-bar-1, .animated-bar-2, .animated-bar-3, .animated-bar-4, .animated-bar-5 {
+  transform-origin: bottom;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.animated-bar-1:hover, .animated-bar-2:hover, .animated-bar-3:hover, .animated-bar-4:hover, .animated-bar-5:hover {
+  fill: #70ad47;
+}
+
+/* Metrics Side by side columns */
+.reports-lists-flex-row {
+  display: flex;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .reports-lists-flex-row {
+    flex-direction: column;
+  }
+}
+
+.report-metrics-list-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-metrics-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.report-metrics-content-box {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-metrics-item-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-badge {
+  display: inline-block;
+  padding: 2.5px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  min-width: 65px;
+  text-align: center;
+}
+
+.item-badge.primary {
+  background: var(--blue-bg);
+  color: var(--blue-text);
+  border: 1px solid var(--blue-border);
+}
+
+.item-badge.warning {
+  background: var(--orange-bg);
+  color: var(--orange-text);
+  border: 1px solid var(--orange-border);
+}
+
+.item-text-detail {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.reports-divider-line {
+  border-top: 1.5px solid var(--border-color);
+  margin-top: 8px;
+}
+
+/* Maintenance and Retirement Section */
+.retirement-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retirement-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.retirement-content-box {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retirement-item-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.retirement-warn-icon {
+  color: #ea580c;
+  flex-shrink: 0;
+}
+
+.retirement-text-detail {
+  font-size: 13.5px;
+  color: var(--text-main);
+}
+
+/* Action button at bottom */
+.reports-footer-action-row {
+  display: flex;
+  margin-top: 8px;
+}
+
+/* Styled export report button (dark background/border) */
+.reports-primary-action-btn {
+  background: #3e322a; /* Dark charcoal/brown matching wireframe and top box */
+  border: 1.5px solid #5c4a3e;
+  color: #ffffff;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reports-primary-action-btn:hover:not(:disabled) {
+  background: #2e241e;
+}
+
+.reports-primary-action-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner-icon-animate {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Export success message alert banner */
+.export-success-banner-alert {
+  background: var(--green-bg);
+  border: 1.5px solid var(--green-border);
+  border-radius: var(--border-radius);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--green-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  animation: fade-in-up-org 0.3s ease-out;
+}
+
+.export-success-icon {
+  color: var(--success-color);
+}
