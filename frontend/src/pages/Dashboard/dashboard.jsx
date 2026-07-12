@@ -148,6 +148,17 @@ export default function Dashboard({ user, onLogout }) {
     ))
   }
 
+  // Screen 4 Assets states
+  const [assetSearchQuery, setAssetSearchQuery] = useState('')
+  const [assetCategoryFilter, setAssetCategoryFilter] = useState('All')
+  const [assetStatusFilter, setAssetStatusFilter] = useState('All')
+  const [assetDeptFilter, setAssetDeptFilter] = useState('All')
+  const [assetsList, setAssetsList] = useState([
+    { tag: 'AF-0012', name: 'Dell Laptop', category: 'Electronics', status: 'Allocated', location: 'bengaluru', dept: 'Engineering' },
+    { tag: 'AF-0062', name: 'Projector', category: 'Electronics', status: 'Maintenance', location: 'HQ floor 2', dept: 'Facilities' },
+    { tag: 'AF-0201', name: 'Office chair', category: 'Furniture', status: 'Available', location: 'Warehouse', dept: 'IT Operations' }
+  ])
+
   // Booking list for the calendar timeline
   const [bookings, setBookings] = useState([
     {
@@ -265,6 +276,16 @@ export default function Dashboard({ user, onLogout }) {
       type: 'allocation'
     }
     setActivities([newAct, ...activities])
+
+    const newAsset = {
+      tag: newAssetTag,
+      name: newAssetName,
+      category: 'Electronics',
+      status: 'Available',
+      location: 'HQ floor 1',
+      dept: 'IT Operations'
+    }
+    setAssetsList(prev => [newAsset, ...prev])
     
     setNewAssetName('')
     setNewAssetTag('')
@@ -897,6 +918,101 @@ export default function Dashboard({ user, onLogout }) {
                 >
                   Book a slot
                 </button>
+              </div>
+            </div>
+          ) : activeMenu === 'Assets' ? (
+            <div className="assets-view-container">
+              {/* Top controls: Search and Register Asset button */}
+              <div className="assets-top-action-bar">
+                <input
+                  type="text"
+                  className="assets-search-input"
+                  placeholder="Search by tag, serial, or QR code.."
+                  value={assetSearchQuery}
+                  onChange={(e) => setAssetSearchQuery(e.target.value)}
+                />
+                <button
+                  className="assets-register-trigger-btn"
+                  onClick={() => setShowRegisterModal(true)}
+                >
+                  + Register Asset
+                </button>
+              </div>
+
+              {/* Filter controls row */}
+              <div className="assets-filters-bar">
+                <select
+                  className="assets-filter-select"
+                  value={assetCategoryFilter}
+                  onChange={(e) => setAssetCategoryFilter(e.target.value)}
+                >
+                  <option value="All">Category</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Furniture">Furniture</option>
+                </select>
+
+                <select
+                  className="assets-filter-select"
+                  value={assetStatusFilter}
+                  onChange={(e) => setAssetStatusFilter(e.target.value)}
+                >
+                  <option value="All">Status</option>
+                  <option value="Available">Available</option>
+                  <option value="Allocated">Allocated</option>
+                  <option value="Maintenance">Maintenance</option>
+                </select>
+
+                <select
+                  className="assets-filter-select"
+                  value={assetDeptFilter}
+                  onChange={(e) => setAssetDeptFilter(e.target.value)}
+                >
+                  <option value="All">Department</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Facilities">Facilities</option>
+                  <option value="IT Operations">IT Operations</option>
+                </select>
+              </div>
+
+              {/* Asset Directory Table */}
+              <div className="assets-table-responsive-wrapper">
+                <table className="assets-data-table-wire">
+                  <thead>
+                    <tr>
+                      <th>Tag</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assetsList
+                      .filter(asset => {
+                        const matchesSearch = 
+                          asset.tag.toLowerCase().includes(assetSearchQuery.toLowerCase()) ||
+                          asset.name.toLowerCase().includes(assetSearchQuery.toLowerCase()) ||
+                          asset.location.toLowerCase().includes(assetSearchQuery.toLowerCase());
+                        const matchesCategory = assetCategoryFilter === 'All' || asset.category === assetCategoryFilter;
+                        const matchesStatus = assetStatusFilter === 'All' || asset.status === assetStatusFilter;
+                        const matchesDept = assetDeptFilter === 'All' || asset.dept === assetDeptFilter;
+                        return matchesSearch && matchesCategory && matchesStatus && matchesDept;
+                      })
+                      .map((asset, index) => (
+                        <tr key={index}>
+                          <td className="font-semibold-wire">{asset.tag}</td>
+                          <td>{asset.name}</td>
+                          <td className="text-muted-wire">{asset.category}</td>
+                          <td>
+                            <span className={`org-status-oval ${asset.status.toLowerCase()}`}>
+                              {asset.status}
+                            </span>
+                          </td>
+                          <td className="text-muted-wire">{asset.location}</td>
+                        </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           ) : activeMenu === 'Allocation & Transfer' ? (

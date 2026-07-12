@@ -1475,3 +1475,143 @@
   border-top: 1.5px solid var(--border-color);
   text-align: center;
 }
+
+/* ==========================================================================
+   Screen 4 - Assets Registration & Directory Styles
+   ========================================================================== */
+
+.assets-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+.assets-top-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.assets-search-input {
+  flex: 1;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  outline: none;
+  background: #ffffff;
+  transition: var(--transition);
+  font-family: var(--font-family);
+  box-shadow: var(--box-shadow);
+}
+
+.assets-search-input:focus {
+  border-color: var(--primary-color);
+}
+
+.assets-register-trigger-btn {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+
+.assets-register-trigger-btn:hover {
+  background: #d4e8c8;
+}
+
+.assets-filters-bar {
+  display: flex;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.assets-filter-select {
+  border: 1.5px solid var(--border-color);
+  border-radius: 18px;
+  padding: 6px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: #ffffff;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+
+.assets-filter-select:hover,
+.assets-filter-select:focus {
+  border-color: var(--primary-color);
+}
+
+.assets-table-responsive-wrapper {
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: #ffffff;
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+
+.assets-data-table-wire {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: var(--font-family);
+}
+
+.assets-data-table-wire th {
+  padding: 16px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: #f8fafc;
+  border-bottom: 1.5px solid var(--border-color);
+}
+
+.assets-data-table-wire td {
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-main);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.assets-data-table-wire tr:last-child td {
+  border-bottom: none;
+}
+
+.assets-data-table-wire tr:hover {
+  background: #f8fafc;
+}
+
+/* Custom Status Badger colors for Directory */
+.org-status-oval.allocated {
+  background: #deebf7;
+  border-color: #9cc2e6;
+  color: #1f4e78;
+}
+
+.org-status-oval.maintenance {
+  background: #fce4d6;
+  border-color: #f4b084;
+  color: #c65911;
+}
+
+.org-status-oval.available {
+  background: #e2f0d9;
+  border-color: #a9d18e;
+  color: #385723;
+}
+
