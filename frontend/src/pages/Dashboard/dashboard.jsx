@@ -31,6 +31,68 @@ export default function Dashboard({ user, onLogout }) {
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showRequestModal, setShowRequestModal] = useState(false)
+
+  // API Integration - Fetch from Django if server is running
+  const API_BASE = 'http://127.0.0.1:8000/api'
+
+  React.useEffect(() => {
+    // 1. Fetch Assets
+    fetch(`${API_BASE}/assets/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          setAssetsList(data)
+        }
+      })
+      .catch(err => console.log('Django Backend offline - using local mock assets.'))
+
+    // 2. Fetch Bookings
+    fetch(`${API_BASE}/bookings/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(b => ({
+            id: b.id,
+            resource: b.resource,
+            team: b.team,
+            start: b.start_time,
+            end: b.end_time,
+            type: b.start_time === '9:30' ? 'conflict' : 'confirmed',
+            text: b.start_time === '9:30' 
+              ? `Requested ${b.start_time} to ${b.end_time} - conflict - slot is unavailable`
+              : `Booked - ${b.team} - ${b.start_time.replace(':00', '')} to ${b.end_time.replace(':00', '')}`
+          }))
+          setBookings(mapped)
+        }
+      })
+      .catch(err => console.log('Django Backend offline - using local mock bookings.'))
+
+    // 3. Fetch Audit Checklist
+    fetch(`${API_BASE}/audits/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(a => ({
+            id: a.asset_id,
+            name: a.asset_name,
+            location: a.expected_location,
+            verification: a.verification
+          }))
+          setAuditAssets(mapped)
+        }
+      })
+      .catch(err => console.log('Django Backend offline - using local mock audit checklist.'))
+
+    // 4. Fetch Notifications
+    fetch(`${API_BASE}/notifications/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data) && data.length > 0) {
+          setNotifications(data)
+        }
+      })
+      .catch(err => console.log('Django Backend offline - using local mock notifications.'))
+  }, [])
   
   // Organization tab states
   const [orgTab, setOrgTab] = useState('Departments')
@@ -125,6 +187,19 @@ export default function Dashboard({ user, onLogout }) {
       type: 'booking'
     }
     setActivities(prev => [newActivity, ...prev])
+
+    // Attempt POST to Django REST API
+    fetch(`${API_BASE}/transfers/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        asset: transferAsset,
+        from_employee: fromEmpName,
+        to_employee: toEmpName,
+        reason: transferReason,
+        status: 'Pending'
+      })
+    }).catch(err => console.log('Django offline - transfer logged locally.'))
 
     setTransferSuccessMsg(`Transfer request submitted successfully.`)
     setToEmpName('')
@@ -286,6 +361,13 @@ export default function Dashboard({ user, onLogout }) {
       dept: 'IT Operations'
     }
     setAssetsList(prev => [newAsset, ...prev])
+
+    // Attempt POST to Django REST API
+    fetch(`${API_BASE}/assets/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newAsset)
+    }).catch(err => console.log('Django offline - saved locally.'))
     
     setNewAssetName('')
     setNewAssetTag('')
@@ -409,6 +491,94 @@ export default function Dashboard({ user, onLogout }) {
     setShowAddOrgModal(false)
   }
 
+  // Toggle Verification status for interactive checklist
+  const handleToggleVerification = (id) => {
+    if (auditCycleClosed) return
+    setAuditAssets(auditAssets.map(asset => {
+      if (asset.id === id) {
+        let nextStatus = 'Verified'
+        if (asset.verification === 'Verified') nextStatus = 'Missing'
+        else if (asset.verification === 'Missing') nextStatus = 'Damaged'
+
+        // Attempt PATCH call to Django REST API if server is online
+        fetch(`${API_BASE}/audits/${id}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ verification: nextStatus })
+        }).catch(err => console.log('Django offline - saved verification status locally.'))
+
+        return { ...asset, verification: nextStatus }
+      }
+      return asset
+    }))
+  }
+
+  // Calculate discrepancy count
+  const discrepancyCount = auditAssets.filter(
+    a => a.verification === 'Missing' || a.verification === 'Damaged'
+  ).length
+
+  // Handle close audit cycle
+  const handleCloseAuditCycle = () => {
+    setAuditCycleClosed(true)
+    const newAct = {
+      id: Date.now(),
+      text: `Q3 Audit Cycle Closed with ${discrepancyCount} discrepancies flagged`,
+      time: 'Just now',
+      type: 'maintenance'
+    }
+    setActivities([newAct, ...activities])
+  }
+
+  // Screen 7 Maintenance Kanban Handlers
+  const handleKanbanAdvance = (cardId) => {
+    setKanbanCards(kanbanCards.map(card => {
+      if (card.id === cardId) {
+        const currentIndex = KANBAN_COLUMNS.indexOf(card.column)
+        if (currentIndex < KANBAN_COLUMNS.length - 1) {
+          const nextCol = KANBAN_COLUMNS[currentIndex + 1]
+          
+          // Add telemetry feed activity
+          const newAct = {
+            id: Date.now(),
+            text: `Maintenance card ${cardId} moved to ${nextCol}`,
+            time: 'Just now',
+            type: nextCol === 'Resolved' ? 'allocation' : 'maintenance'
+          }
+          setActivities([newAct, ...activities])
+
+          return { ...card, column: nextCol }
+        }
+      }
+      return card
+    }))
+  }
+
+  const handleAddMaintenanceCard = (e) => {
+    e.preventDefault()
+    if (!newMaintenanceId || !newMaintenanceDesc) return
+
+    const newCard = {
+      id: newMaintenanceId,
+      desc: newMaintenanceDesc,
+      column: 'Pending'
+    }
+
+    setKanbanCards([newCard, ...kanbanCards])
+
+    const newAct = {
+      id: Date.now(),
+      text: `New maintenance card raised for ${newMaintenanceId}`,
+      time: 'Just now',
+      type: 'maintenance'
+    }
+    setActivities([newAct, ...activities])
+
+    setNewMaintenanceId('')
+    setNewMaintenanceDesc('')
+    setShowAddMaintenanceModal(false)
+  }
+
   // Handle timeline slot booking
   const handleCreateTimelineBooking = (e) => {
     e.preventDefault()
@@ -439,6 +609,19 @@ export default function Dashboard({ user, onLogout }) {
       type: hasConflict ? 'maintenance' : 'booking'
     }
     setActivities([newAct, ...activities])
+
+    // Attempt POST to Django REST API
+    fetch(`${API_BASE}/bookings/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        resource: selectedResource,
+        team: bookingTeamName,
+        start_time: bookingStartTime,
+        end_time: bookingEndTime
+      })
+    }).catch(err => console.log('Django offline - saved booking locally.'))
+    
     setShowNewBookingModal(false)
   }
 
