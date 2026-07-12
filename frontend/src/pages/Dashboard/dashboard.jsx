@@ -1,668 +1,378 @@
 import React, { useState } from 'react'
-import { 
-  LayoutDashboard, 
-  Server, 
-  Activity, 
-  Settings, 
-  LogOut, 
-  Search, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  CheckCircle, 
-  AlertTriangle, 
-  XCircle, 
-  TrendingUp,
-  X,
-  Database,
-  Sliders
+import {
+  LayoutDashboard,
+  Building2,
+  Laptop,
+  ArrowLeftRight,
+  Calendar,
+  Wrench,
+  ShieldCheck,
+  FileBarChart,
+  Search,
+  Bell,
+  Settings,
+  ChevronDown,
+  ChevronRight,
+  HardDrive,
+  LogOut
 } from 'lucide-react'
 import './dashboard.css'
 
-// Initial mock assets
-const INITIAL_ASSETS = [
-  { id: 'AST-001', name: 'Server Node Alpha', type: 'Compute', status: 'Operational', value: 12500, location: 'Rack A-12', updated: '2 hrs ago' },
-  { id: 'AST-002', name: 'Core Switch 400G', type: 'Networking', status: 'Operational', value: 8700, location: 'Rack B-03', updated: '1 day ago' },
-  { id: 'AST-003', name: 'Dev Workstation 12', type: 'Hardware', status: 'Maintenance', value: 2400, location: 'Floor 3 - Desk 42', updated: '10 mins ago' },
-  { id: 'AST-004', name: 'Kubernetes Cluster B', type: 'Compute', status: 'Operational', value: 45000, location: 'AWS cloud-east', updated: '5 mins ago' },
-  { id: 'AST-005', name: 'Corporate NAS Storage', type: 'Storage', status: 'Offline', value: 16200, location: 'Rack A-05', updated: '3 hrs ago' },
-  { id: 'AST-006', name: 'Backup UPS Unit', type: 'Hardware', status: 'Operational', value: 3100, location: 'Power Room 1', updated: '2 days ago' },
-]
-
 export default function Dashboard({ user, onLogout }) {
-  const [activeMenu, setActiveMenu] = useState('Overview')
-  const [assets, setAssets] = useState(INITIAL_ASSETS)
+  const [activeMenu, setActiveMenu] = useState('Dashboard')
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
-  
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingAsset, setEditingAsset] = useState(null)
-  
-  // Form fields
-  const [formName, setFormName] = useState('')
-  const [formType, setFormType] = useState('Compute')
-  const [formStatus, setFormStatus] = useState('Operational')
-  const [formValue, setFormValue] = useState('')
-  const [formLocation, setFormLocation] = useState('')
 
-  // Open modal for adding
-  const handleOpenAddModal = () => {
-    setEditingAsset(null)
-    setFormName('')
-    setFormType('Compute')
-    setFormStatus('Operational')
-    setFormValue('')
-    setFormLocation('')
-    setIsModalOpen(true)
-  }
-
-  // Open modal for editing
-  const handleOpenEditModal = (asset) => {
-    setEditingAsset(asset)
-    setFormName(asset.name)
-    setFormType(asset.type)
-    setFormStatus(asset.status)
-    setFormValue(asset.value)
-    setFormLocation(asset.location)
-    setIsModalOpen(true)
-  }
-
-  // Save asset (create/update)
-  const handleSaveAsset = (e) => {
-    e.preventDefault()
-    if (!formName || !formValue) return
-
-    if (editingAsset) {
-      // Update
-      setAssets(assets.map(a => a.id === editingAsset.id ? {
-        ...a,
-        name: formName,
-        type: formType,
-        status: formStatus,
-        value: Number(formValue),
-        location: formLocation,
-        updated: 'Just now'
-      } : a))
-    } else {
-      // Create
-      const newId = `AST-00${assets.length + 1}`
-      const newAsset = {
-        id: newId,
-        name: formName,
-        type: formType,
-        status: formStatus,
-        value: Number(formValue),
-        location: formLocation,
-        updated: 'Just now'
-      }
-      setAssets([newAsset, ...assets])
+  // Mock activity data matching the image
+  const activities = [
+    {
+      id: 1,
+      type: 'ASSIGN',
+      details: 'Laptop AF-0014 assigned',
+      actor: 'Priya Shah',
+      date: '24m ago',
+      initials: 'PS'
+    },
+    {
+      id: 2,
+      type: 'BOOKING',
+      details: 'Room B2 reservation confirmed',
+      actor: 'Marcus V.',
+      date: '1h ago',
+      initials: 'MV'
+    },
+    {
+      id: 3,
+      type: 'REPAIR',
+      details: 'Projector maintenance completed',
+      actor: 'Tech Support',
+      date: '3h ago',
+      initials: 'TS'
     }
-    setIsModalOpen(false)
-  }
+  ]
 
-  // Delete asset
-  const handleDeleteAsset = (id) => {
-    setAssets(assets.filter(a => a.id !== id))
-  }
-
-  // Statistics calculation
-  const totalAssetsCount = assets.length
-  const totalValue = assets.reduce((sum, item) => sum + item.value, 0)
-  const activeCount = assets.filter(a => a.status === 'Operational').length
-  const maintenanceCount = assets.filter(a => a.status === 'Maintenance').length
-  const offlineCount = assets.filter(a => a.status === 'Offline').length
-
-  // Filtered assets for list view
-  const filteredAssets = assets.filter(a => {
-    const matchesSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          a.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          a.location.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === 'All' || a.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
-
-  // Format currency
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val)
-  }
+  // Menu list matching the image
+  const menuItems = [
+    { name: 'Dashboard', icon: LayoutDashboard },
+    { name: 'Organization', icon: Building2 },
+    { name: 'Assets', icon: Laptop },
+    { name: 'Transfers', icon: ArrowLeftRight },
+    { name: 'Resource Booking', icon: Calendar },
+    { name: 'Maintenance', icon: Wrench },
+    { name: 'Audit', icon: ShieldCheck },
+    { name: 'Reports', icon: FileBarChart }
+  ]
 
   return (
-    <div className="dashboard-container">
-      {/* Sidebar Navigation */}
-      <aside className="sidebar glass">
-        <div className="sidebar-logo">
-          <div className="logo-small-icon">AF</div>
-          <h2>ASSETFLOW</h2>
+    <div className="dashboard-layout">
+      {/* Top Header Bar */}
+      <header className="dashboard-top-bar">
+        <div className="header-left">
+          <div className="logo-brand">AssetFlow</div>
+          <div className="header-search-wrapper">
+            <Search className="search-bar-icon" size={16} />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
         </div>
-        
-        <ul className="sidebar-menu">
-          <li 
-            className={`menu-item ${activeMenu === 'Overview' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('Overview')}
-          >
-            <LayoutDashboard size={18} />
-            Overview
-          </li>
-          <li 
-            className={`menu-item ${activeMenu === 'Assets' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('Assets')}
-          >
-            <Server size={18} />
-            Assets Catalog
-          </li>
-          <li 
-            className={`menu-item ${activeMenu === 'System' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('System')}
-          >
-            <Activity size={18} />
-            System Health
-          </li>
-          <li 
-            className={`menu-item ${activeMenu === 'Settings' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('Settings')}
-          >
-            <Settings size={18} />
-            Settings
-          </li>
-        </ul>
 
-        {/* User Card */}
-        <div className="sidebar-user">
-          <div className="user-avatar">
-            {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'JD'}
-          </div>
-          <div className="user-info">
-            <div className="user-name">{user?.name || 'John Doe'}</div>
-            <div className="user-role">{user?.department || 'IT Operations'}</div>
-          </div>
-          <button className="logout-btn" onClick={onLogout} title="Sign Out">
-            <LogOut size={18} />
+        <div className="header-right">
+          <button className="icon-header-btn" title="Alerts & Telemetry">
+            <Bell size={18} />
           </button>
-        </div>
-      </aside>
-
-      {/* Main dashboard panel */}
-      <main className="dashboard-main">
-        {/* Header bar */}
-        <header className="dashboard-header">
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: '700' }}>
-              {activeMenu === 'Overview' && 'Enterprise Overview'}
-              {activeMenu === 'Assets' && 'Assets Catalog'}
-              {activeMenu === 'System' && 'Live System Monitor'}
-              {activeMenu === 'Settings' && 'System Preferences'}
-            </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-              Welcome back, {user?.name || 'User'} • Standard corporate authorization.
-            </p>
-          </div>
-
-          <div className="header-actions">
-            {activeMenu === 'Assets' && (
-              <div className="header-search">
-                <Search size={16} className="search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search assets, ID, rack location..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            )}
-
-            <button className="action-btn" title="System Alerts">
-              <Activity size={16} />
-              {offlineCount > 0 && <span className="badge-dot"></span>}
-            </button>
-
-            <button className="create-asset-btn" onClick={handleOpenAddModal}>
-              <Plus size={16} />
-              Register Asset
-            </button>
-          </div>
-        </header>
-
-        {/* View Switcher Content */}
-        <div className="dashboard-content">
+          <button className="icon-header-btn" title="System Settings">
+            <Settings size={18} />
+          </button>
           
-          {activeMenu === 'Overview' && (
-            <>
-              {/* Stat grid */}
-              <div className="stats-grid">
-                <div className="stat-card glass">
-                  <div className="stat-header">
-                    <span className="stat-title">Total Portfolio Value</span>
-                    <div className="stat-icon-wrapper purple">
-                      <TrendingUp size={20} />
-                    </div>
-                  </div>
-                  <div className="stat-value">{formatCurrency(totalValue)}</div>
-                  <div className="stat-trend up">
-                    <span>+12.4%</span>
-                    <span className="stat-trend-text">from last quarter</span>
-                  </div>
+          <div className="user-profile-dropdown">
+            <div className="user-avatar-circle">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100"
+                alt="Alex Chen"
+                className="avatar-img"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://ui-avatars.com/api/?name=Alex+Chen&background=6d28d9&color=fff";
+                }}
+              />
+            </div>
+            <span className="profile-name">{user?.name || 'Alex Chen'}</span>
+            <ChevronDown size={14} className="dropdown-arrow-icon" />
+            
+            <div className="profile-hover-menu">
+              <button onClick={onLogout} className="logout-menu-item">
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="dashboard-body">
+        {/* Left Sidebar */}
+        <aside className="dashboard-sidebar">
+          {/* Organization Widget */}
+          <div className="sidebar-org-box">
+            <div className="org-icon-avatar">GE</div>
+            <div className="org-details">
+              <div className="org-name">Global Enterprise</div>
+              <div className="org-region">MUMBAI REGION B</div>
+            </div>
+          </div>
+
+          {/* Sidebar Menu Items */}
+          <nav className="sidebar-nav-menu">
+            {menuItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.name}
+                  className={`sidebar-nav-btn ${activeMenu === item.name ? 'active' : ''}`}
+                  onClick={() => setActiveMenu(item.name)}
+                >
+                  <Icon size={18} className="menu-icon" />
+                  <span>{item.name}</span>
+                </button>
+              )
+            })}
+          </nav>
+
+          {/* Storage Indicator at bottom */}
+          <div className="sidebar-bottom-indicator">
+            <div className="indicator-label-row">
+              <span className="indicator-title">Storage</span>
+              <span className="indicator-percentage">76%</span>
+            </div>
+            <div className="indicator-progress-track">
+              <div className="indicator-progress-fill" style={{ width: '76%' }}></div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Dashboard Content */}
+        <main className="dashboard-main-content">
+          {activeMenu === 'Dashboard' ? (
+            <div className="dashboard-grid-view">
+              
+              {/* Row 1 Left: Recent Activity */}
+              <section className="dashboard-card recent-activity-card">
+                <div className="card-header-row">
+                  <h3 className="card-title">Recent Activity</h3>
+                  <a href="#logs" className="card-action-link">View All Logs</a>
                 </div>
 
-                <div className="stat-card glass">
-                  <div className="stat-header">
-                    <span className="stat-title">Operational Assets</span>
-                    <div className="stat-icon-wrapper green">
-                      <CheckCircle size={20} />
-                    </div>
-                  </div>
-                  <div className="stat-value">{activeCount} / {totalAssetsCount}</div>
-                  <div className="stat-trend up">
-                    <span>94.2%</span>
-                    <span className="stat-trend-text">system availability</span>
-                  </div>
-                </div>
-
-                <div className="stat-card glass">
-                  <div className="stat-header">
-                    <span className="stat-title">In Maintenance</span>
-                    <div className="stat-icon-wrapper amber">
-                      <AlertTriangle size={20} />
-                    </div>
-                  </div>
-                  <div className="stat-value">{maintenanceCount}</div>
-                  <div className="stat-trend">
-                    <span style={{ color: 'var(--warning)' }}>2 Pending</span>
-                    <span className="stat-trend-text">routine schedules</span>
-                  </div>
-                </div>
-
-                <div className="stat-card glass">
-                  <div className="stat-header">
-                    <span className="stat-title">Offline Incidents</span>
-                    <div className="stat-icon-wrapper">
-                      <XCircle size={20} style={{ color: offlineCount > 0 ? 'var(--danger)' : 'var(--text-dark)' }} />
-                    </div>
-                  </div>
-                  <div className="stat-value" style={{ color: offlineCount > 0 ? 'var(--danger)' : 'var(--text-main)' }}>{offlineCount}</div>
-                  <div className="stat-trend">
-                    <span style={{ color: offlineCount > 0 ? 'var(--danger)' : 'var(--text-dark)' }}>
-                      {offlineCount > 0 ? 'Urgent attention required' : 'System healthy'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Charts grid */}
-              <div className="charts-grid">
-                {/* Value over time SVG chart */}
-                <div className="chart-card glass">
-                  <div className="chart-title-block">
-                    <div>
-                      <h3>Asset Valuation Trend</h3>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Valuation curves over the past 6 months</p>
-                    </div>
-                    <div className="chart-filters">
-                      <button className="chart-filter-btn active">6 Months</button>
-                      <button className="chart-filter-btn">1 Year</button>
-                    </div>
-                  </div>
-                  <div className="chart-body">
-                    {/* SVG Interactive Line Chart */}
-                    <svg className="chart-svg" viewBox="0 0 500 240">
-                      <defs>
-                        <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="var(--primary)" />
-                          <stop offset="100%" stopColor="var(--secondary)" />
-                        </linearGradient>
-                        <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="var(--bg-card)" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      
-                      {/* Grid Lines */}
-                      <line x1="40" y1="40" x2="480" y2="40" className="chart-grid-line" />
-                      <line x1="40" y1="100" x2="480" y2="100" className="chart-grid-line" />
-                      <line x1="40" y1="160" x2="480" y2="160" className="chart-grid-line" />
-                      <line x1="40" y1="210" x2="480" y2="210" className="chart-grid-line" />
-                      
-                      {/* X and Y Axis text */}
-                      <text x="15" y="45" fill="var(--text-dark)" fontSize="10">80K</text>
-                      <text x="15" y="105" fill="var(--text-dark)" fontSize="10">50K</text>
-                      <text x="15" y="165" fill="var(--text-dark)" fontSize="10">20K</text>
-                      
-                      <text x="50" y="230" fill="var(--text-dark)" fontSize="10">Jan</text>
-                      <text x="130" y="230" fill="var(--text-dark)" fontSize="10">Feb</text>
-                      <text x="210" y="230" fill="var(--text-dark)" fontSize="10">Mar</text>
-                      <text x="290" y="230" fill="var(--text-dark)" fontSize="10">Apr</text>
-                      <text x="370" y="230" fill="var(--text-dark)" fontSize="10">May</text>
-                      <text x="450" y="230" fill="var(--text-dark)" fontSize="10">Jun</text>
-
-                      {/* Area and Line Path */}
-                      <path d="M 50 180 L 130 160 L 210 130 L 290 100 L 370 70 L 450 50 L 450 210 L 50 210 Z" className="chart-area" />
-                      <path d="M 50 180 Q 130 160 210 130 T 290 100 T 370 70 T 450 50" className="chart-line" />
-
-                      {/* Dots on line */}
-                      <circle cx="50" cy="180" r="4" className="chart-dot" />
-                      <circle cx="130" cy="160" r="4" className="chart-dot" />
-                      <circle cx="210" cy="130" r="4" className="chart-dot" />
-                      <circle cx="290" cy="100" r="4" className="chart-dot" />
-                      <circle cx="370" cy="70" r="4" className="chart-dot" />
-                      <circle cx="450" cy="50" r="4" className="chart-dot" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Resource Category distribution */}
-                <div className="chart-card glass">
-                  <div className="chart-title-block">
-                    <div>
-                      <h3>Asset Categories</h3>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Portfolio allocation distribution</p>
-                    </div>
-                  </div>
-                  
-                  <div className="donut-container">
-                    <svg className="donut-svg" viewBox="0 0 42 42">
-                      <circle className="donut-bg-ring" cx="21" cy="21" r="15.915" />
-                      {/* Segment 1: Compute (50%) */}
-                      <circle 
-                        className="donut-segment p1" 
-                        cx="21" 
-                        cy="21" 
-                        r="15.915" 
-                        strokeDasharray="50 100" 
-                        strokeDashoffset="0"
-                      />
-                      {/* Segment 2: Networking (30%) */}
-                      <circle 
-                        className="donut-segment p2" 
-                        cx="21" 
-                        cy="21" 
-                        r="15.915" 
-                        strokeDasharray="30 100" 
-                        strokeDashoffset="-50"
-                      />
-                      {/* Segment 3: Hardware/Storage (20%) */}
-                      <circle 
-                        className="donut-segment p3" 
-                        cx="21" 
-                        cy="21" 
-                        r="15.915" 
-                        strokeDasharray="20 100" 
-                        strokeDashoffset="-80"
-                      />
-                    </svg>
-                    <div className="donut-center-text">
-                      <div className="donut-center-num">3</div>
-                      <div className="donut-center-lbl">Categories</div>
-                    </div>
-                  </div>
-
-                  <div className="donut-legend">
-                    <div className="legend-item">
-                      <div className="legend-label-group">
-                        <span className="legend-dot p1"></span>
-                        <span>Compute</span>
-                      </div>
-                      <span className="legend-val">50%</span>
-                    </div>
-                    <div className="legend-item">
-                      <div className="legend-label-group">
-                        <span className="legend-dot p2"></span>
-                        <span>Networking</span>
-                      </div>
-                      <span className="legend-val">30%</span>
-                    </div>
-                    <div className="legend-item">
-                      <div className="legend-label-group">
-                        <span className="legend-dot p3"></span>
-                        <span>Storage & Hardware</span>
-                      </div>
-                      <span className="legend-val">20%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {activeMenu === 'Assets' && (
-            <div className="table-card glass">
-              <div className="table-header-row">
-                <h3>Registered Resources</h3>
-                <div className="table-controls">
-                  <select 
-                    className="table-select" 
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Operational">Operational</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Offline">Offline</option>
-                  </select>
-                </div>
-              </div>
-
-              {filteredAssets.length === 0 ? (
-                <div className="empty-state">
-                  <Database size={48} className="empty-state-icon" />
-                  <p>No matching resources found</p>
-                  <p style={{ fontSize: '13px', color: 'var(--text-dark)', marginTop: '4px' }}>
-                    Try adjusting your search criteria or register a new asset.
-                  </p>
-                </div>
-              ) : (
-                <div className="table-container">
-                  <table className="assets-table">
+                <div className="table-responsive-container">
+                  <table className="activity-table-ui">
                     <thead>
                       <tr>
-                        <th>Asset Details</th>
-                        <th>Type</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                        <th>Valuation</th>
-                        <th>Actions</th>
+                        <th>Event</th>
+                        <th>Details</th>
+                        <th>Actor</th>
+                        <th>Date</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredAssets.map(asset => (
-                        <tr key={asset.id}>
+                      {activities.map((act) => (
+                        <tr key={act.id}>
                           <td>
-                            <div className="asset-name-cell">
-                              <div className="asset-icon-cube">
-                                <Database size={16} />
-                              </div>
-                              <div>
-                                <div className="asset-title">{asset.name}</div>
-                                <div className="asset-tag">{asset.id}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>{asset.type}</td>
-                          <td>{asset.location}</td>
-                          <td>
-                            <span className={`status-badge ${asset.status.toLowerCase()}`}>
-                              <span className="badge-pulse"></span>
-                              {asset.status}
+                            <span className={`event-badge-label ${act.type.toLowerCase()}`}>
+                              {act.type}
                             </span>
                           </td>
-                          <td style={{ fontWeight: '600' }}>{formatCurrency(asset.value)}</td>
+                          <td className="event-details-text">{act.details}</td>
                           <td>
-                            <div className="row-actions">
-                              <button 
-                                className="row-action-btn" 
-                                title="Edit Asset"
-                                onClick={() => handleOpenEditModal(asset)}
-                              >
-                                <Edit3 size={14} />
-                              </button>
-                              <button 
-                                className="row-action-btn delete" 
-                                title="Delete Asset"
-                                onClick={() => handleDeleteAsset(asset.id)}
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                            <div className="actor-profile-row">
+                              <span className="actor-avatar-circle">{act.initials}</span>
+                              <span className="actor-name-text">{act.actor}</span>
                             </div>
                           </td>
+                          <td className="event-date-text">{act.date}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-          )}
+              </section>
 
-          {activeMenu === 'System' && (
-            <div className="table-card glass" style={{ textAlign: 'center', padding: '60px 40px' }}>
-              <Activity size={48} style={{ color: 'var(--secondary)', marginBottom: '16px' }} />
-              <h3>Live Telemetry Connected</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '8px', maxWidth: '400px', margin: '8px auto 0' }}>
-                AssetFlow system agents are active. Sub-second telemetry loops are reporting metrics on 12 physical nodes.
-              </p>
-              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '32px' }}>
-                <div style={{ padding: '16px 24px', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Avg CPU Load</div>
-                  <div style={{ fontSize: '24px', fontWeight: '700', marginTop: '4px', color: 'var(--success)' }}>18.4%</div>
-                </div>
-                <div style={{ padding: '16px 24px', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Memory Pools</div>
-                  <div style={{ fontSize: '24px', fontWeight: '700', marginTop: '4px', color: 'var(--success)' }}>42.8 GB</div>
-                </div>
-                <div style={{ padding: '16px 24px', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Network IO</div>
-                  <div style={{ fontSize: '24px', fontWeight: '700', marginTop: '4px', color: 'var(--secondary)' }}>2.4 Gb/s</div>
-                </div>
-              </div>
-            </div>
-          )}
+              {/* Row 1 Right: Quick Actions */}
+              <section className="dashboard-card quick-actions-card">
+                <h3 className="card-title">Quick Actions</h3>
+                
+                <div className="quick-action-buttons-list">
+                  <button className="quick-action-link-btn">
+                    <div className="btn-left-content">
+                      <Laptop size={18} className="action-btn-icon" />
+                      <span>Register New Asset</span>
+                    </div>
+                    <ChevronRight size={16} className="chevron-indicator" />
+                  </button>
 
-          {activeMenu === 'Settings' && (
-            <div className="table-card glass">
-              <h3 style={{ marginBottom: '16px' }}>System Preferences</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
-                <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' }}>
-                  <h4 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Notifications Trigger</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Send critical alert email when an asset marks offline status.</p>
-                </div>
-                <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' }}>
-                  <h4 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>API Telemetry Key</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Authenticates external monitoring nodes.</p>
-                  <code style={{ background: 'var(--bg-input)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', border: '1px solid var(--border-color)', display: 'inline-block' }}>
-                    tok_live_8a3f9e218c39abfd
-                  </code>
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '6px' }}>Organization Unit</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Assigned division for AssetFlow operations.</p>
-                  <span style={{ background: 'rgba(124, 58, 237, 0.1)', border: '1px solid var(--primary)', color: '#c084fc', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' }}>
-                    GLOBAL OPERATIONS GROUP B
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-        </div>
-      </main>
+                  <button className="quick-action-link-btn">
+                    <div className="btn-left-content">
+                      <Calendar size={18} className="action-btn-icon" />
+                      <span>Book Resource</span>
+                    </div>
+                    <ChevronRight size={16} className="chevron-indicator" />
+                  </button>
 
-      {/* Register / Edit Modal */}
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-card glass">
-            <div className="modal-header">
-              <h3>{editingAsset ? 'Edit Asset Record' : 'Register Corporate Asset'}</h3>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>
-                <X size={18} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSaveAsset}>
-              <div className="form-group">
-                <label>Resource Name</label>
-                <div className="input-container">
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Storage Server C" 
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    required
-                    style={{ paddingLeft: '14px' }}
-                  />
+                  <button className="quick-action-link-btn">
+                    <div className="btn-left-content">
+                      <Wrench size={18} className="action-btn-icon" />
+                      <span>Maintenance Request</span>
+                    </div>
+                    <ChevronRight size={16} className="chevron-indicator" />
+                  </button>
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div className="form-group">
-                  <label>Category</label>
-                  <div className="input-container">
-                    <select 
-                      value={formType}
-                      onChange={(e) => setFormType(e.target.value)}
-                      style={{ paddingLeft: '14px' }}
-                    >
-                      <option value="Compute">Compute</option>
-                      <option value="Networking">Networking</option>
-                      <option value="Storage">Storage</option>
-                      <option value="Hardware">Hardware</option>
-                    </select>
+                {/* Isometric quick overview illustration box */}
+                <div className="isometric-overview-box">
+                  <div className="isometric-box-title">QUICK OVERVIEW</div>
+                  <div className="isometric-svg-wrapper">
+                    <svg viewBox="0 0 320 160" fill="none" stroke="currentColor" strokeWidth="1.2" className="isometric-vector-svg">
+                      {/* Isometric Grid Floor lines */}
+                      <path d="M 160 20 L 280 80 L 160 140 L 40 80 Z" stroke="#e4e4e7" />
+                      <path d="M 80 50 L 200 110" stroke="#f4f4f5" />
+                      <path d="M 120 35 L 240 95" stroke="#f4f4f5" />
+                      <path d="M 200 50 L 80 110" stroke="#f4f4f5" />
+                      <path d="M 240 35 L 120 95" stroke="#f4f4f5" />
+
+                      {/* Cubes / Server blocks */}
+                      {/* Server Block 1 (Left) */}
+                      <g transform="translate(100, 65)">
+                        <polygon points="0,-20 20,-10 0,0 -20,-10" fill="#fcfcfc" stroke="#a1a1aa" />
+                        <polygon points="-20,-10 0,0 0,25 -20,15" fill="#f4f4f5" stroke="#a1a1aa" />
+                        <polygon points="0,0 20,-10 20,15 0,25" fill="#e4e4e7" stroke="#a1a1aa" />
+                        {/* Server panel lines */}
+                        <line x1="-12" y1="-2" x2="-4" y2="2" stroke="#71717a" strokeWidth="1" />
+                        <line x1="-12" y1="3" x2="-4" y2="7" stroke="#71717a" strokeWidth="1" />
+                        <line x1="-12" y1="8" x2="-4" y2="12" stroke="#71717a" strokeWidth="1" />
+                      </g>
+
+                      {/* Server Block 2 (Center-Right) */}
+                      <g transform="translate(180, 75)">
+                        <polygon points="0,-30 30,-15 0,0 -30,-15" fill="#fcfcfc" stroke="#71717a" />
+                        <polygon points="-30,-15 0,0 0,35 -30,20" fill="#f4f4f5" stroke="#71717a" />
+                        <polygon points="0,0 30,-15 30,20 0,35" fill="#e4e4e7" stroke="#71717a" />
+                        {/* Server lights detail */}
+                        <circle cx="10" cy="5" r="1.5" fill="#6d28d9" stroke="none" />
+                        <circle cx="20" cy="0" r="1.5" fill="#3b82f6" stroke="none" />
+                        <line x1="-20" y1="-5" x2="-5" y2="2" stroke="#a1a1aa" />
+                        <line x1="-20" y1="2" x2="-5" y2="9" stroke="#a1a1aa" />
+                        <line x1="-20" y1="9" x2="-5" y2="16" stroke="#a1a1aa" />
+                      </g>
+
+                      {/* Laptop / Console Box (Front) */}
+                      <g transform="translate(140, 110)">
+                        <polygon points="0,-8 12,-2 0,4 -12,-2" fill="#ffffff" stroke="#71717a" />
+                        <polygon points="-12,-2 0,4 0,8 -12,2" fill="#f4f4f5" stroke="#71717a" />
+                        <polygon points="0,4 12,-2 12,4 0,8" fill="#e4e4e7" stroke="#71717a" />
+                        {/* Open screen */}
+                        <polygon points="-2,-6 -2,-18 6,-14 6,-2" fill="#f4f4f5" stroke="#71717a" />
+                        <polygon points="0,-8 0,-16 4,-14 4,-6" fill="#ffffff" stroke="#6d28d9" strokeWidth="0.5" />
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+              </section>
+
+              {/* Row 2 Left: Asset Distribution Map */}
+              <section className="dashboard-card asset-distribution-card">
+                <h3 className="card-title">Asset Distribution</h3>
+                
+                <div className="map-visualization-area">
+                  {/* Grid Lines Overlay */}
+                  <div className="grid-overlay"></div>
+                  
+                  {/* Map Schematic Drawing */}
+                  <svg viewBox="0 0 450 260" fill="none" stroke="currentColor" className="blueprint-map-svg">
+                    {/* Outline floor plan */}
+                    <rect x="20" y="20" width="410" height="220" rx="6" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="3 3" />
+                    <rect x="40" y="40" width="370" height="180" rx="4" stroke="#f4f4f5" strokeWidth="1.2" />
+                    
+                    {/* Partition walls */}
+                    <line x1="140" y1="40" x2="140" y2="180" stroke="#f4f4f5" strokeWidth="1.2" />
+                    <line x1="280" y1="80" x2="280" y2="220" stroke="#f4f4f5" strokeWidth="1.2" />
+                    <line x1="140" y1="120" x2="220" y2="120" stroke="#f4f4f5" strokeWidth="1.2" />
+                    
+                    {/* Furniture / Desks outlines */}
+                    <rect x="60" y="60" width="50" height="30" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
+                    <rect x="60" y="110" width="50" height="30" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
+                    <rect x="170" y="60" width="80" height="40" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
+                    <rect x="310" y="140" width="70" height="40" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
+                    
+                    {/* Pulse glowing blue/violet point in center */}
+                    <g transform="translate(225, 130)">
+                      <circle cx="0" cy="0" r="16" fill="rgba(109, 40, 217, 0.12)" className="pulse-map-glow-slow" />
+                      <circle cx="0" cy="0" r="8" fill="rgba(109, 40, 217, 0.25)" className="pulse-map-glow-fast" />
+                      <circle cx="0" cy="0" r="3.5" fill="#6d28d9" />
+                    </g>
+                  </svg>
+
+                  <div className="map-bottom-tag">Map Display Active - All Systems</div>
+                </div>
+              </section>
+
+              {/* Row 2 Right: Maintenance Insights */}
+              <section className="dashboard-card maintenance-insights-card">
+                <h3 className="card-title">Maintenance Insights</h3>
+                <p className="card-subtitle-desc">Infrastructure health metrics and regional repair efficiency.</p>
+
+                <div className="insights-metrics-bars">
+                  {/* Progress Metric 1 */}
+                  <div className="progress-metric-item">
+                    <div className="metric-header-row">
+                      <span className="metric-name-title">INFRASTRUCTURE HEALTH</span>
+                      <span className="metric-value-num">98.2%</span>
+                    </div>
+                    <div className="thick-progress-track health-track">
+                      <div className="thick-progress-fill health-fill" style={{ width: '98.2%' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Progress Metric 2 */}
+                  <div className="progress-metric-item">
+                    <div className="metric-header-row">
+                      <span className="metric-name-title">AVG. REPAIR TIME</span>
+                      <span className="metric-value-num">2.4 hrs</span>
+                    </div>
+                    <div className="thick-progress-track repair-track">
+                      <div className="thick-progress-fill repair-fill" style={{ width: '24%' }}></div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Initial Status</label>
-                  <div className="input-container">
-                    <select 
-                      value={formStatus}
-                      onChange={(e) => setFormStatus(e.target.value)}
-                      style={{ paddingLeft: '14px' }}
-                    >
-                      <option value="Operational">Operational</option>
-                      <option value="Maintenance">Maintenance</option>
-                      <option value="Offline">Offline</option>
-                    </select>
+                {/* Grid of 3 Stat Blocks */}
+                <div className="insights-stats-row-grid">
+                  <div className="stat-value-block">
+                    <div className="block-title">LAST DATA</div>
+                    <div className="block-value-text text-dark">2m ago</div>
+                  </div>
+
+                  <div className="stat-value-block">
+                    <div className="block-title">STATUS</div>
+                    <div className="block-value-text text-green">optimal</div>
+                  </div>
+
+                  <div className="stat-value-block">
+                    <div className="block-title">NET VALUE</div>
+                    <div className="block-value-text text-red">$34.2M</div>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div className="form-group">
-                <label>Valuation (USD)</label>
-                <div className="input-container">
-                  <input 
-                    type="number" 
-                    placeholder="12000" 
-                    value={formValue}
-                    onChange={(e) => setFormValue(e.target.value)}
-                    required
-                    style={{ paddingLeft: '14px' }}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Storage / Rack Location</label>
-                <div className="input-container">
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Rack A-12 or floor/room" 
-                    value={formLocation}
-                    onChange={(e) => setFormLocation(e.target.value)}
-                    style={{ paddingLeft: '14px' }}
-                  />
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button type="button" className="cancel-btn" onClick={() => setIsModalOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="create-asset-btn">
-                  Save Resource
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          ) : (
+            <div className="fallback-tab-content">
+              <h2 className="fallback-tab-title">{activeMenu} Section</h2>
+              <p className="fallback-tab-desc">This interface is under active development. Select "Dashboard" from the menu to see the main view.</p>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }
