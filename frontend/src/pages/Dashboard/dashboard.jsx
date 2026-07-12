@@ -18,89 +18,17 @@ import {
   X,
   Edit2,
   Trash2,
-  Clock
+  Clock,
+  Check,
+  ClipboardList
 } from 'lucide-react'
 import './dashboard.css'
 
 export default function Dashboard({ user, onLogout }) {
-  const [activeMenu, setActiveMenu] = useState('Resource Booking')
+  const [activeMenu, setActiveMenu] = useState('Audit')
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showRequestModal, setShowRequestModal] = useState(false)
-  
-  // Transfer screen states
-  const [transferAsset, setTransferAsset] = useState('AF-0114 - Dell laptop')
-  const [fromEmpName, setFromEmpName] = useState('Priya Shah')
-  const [toEmpName, setToEmpName] = useState('')
-  const [transferReason, setTransferReason] = useState('')
-  const [transferSuccessMsg, setTransferSuccessMsg] = useState('')
-  const [isAllocated, setIsAllocated] = useState(true)
-  const [allocatedUser, setAllocatedUser] = useState('Priya shah (Engineering)')
-
-  // Asset history state map
-  const [histories, setHistories] = useState({
-    'AF-0114 - Dell laptop': [
-      { date: 'Mar 12', desc: 'Allocated to Priya shah - Engineering' },
-      { date: 'Jan 04', desc: 'Returned by Arjun Nair - condition: good' }
-    ],
-    'AF-0088 - iPad Pro': [
-      { date: 'May 10', desc: 'Allocated to Marcus V. - Facilities' }
-    ],
-    'AF-0062 - Projector': [
-      { date: 'Feb 15', desc: 'Returned by Alex Chen - condition: good' }
-    ]
-  })
-
-  // Handle asset dropdown change
-  const handleAssetChange = (asset) => {
-    setTransferAsset(asset)
-    setTransferSuccessMsg('')
-    setToEmpName('')
-    setTransferReason('')
-    
-    if (asset === 'AF-0114 - Dell laptop') {
-      setIsAllocated(true)
-      setFromEmpName('Priya Shah')
-      setAllocatedUser('Priya shah (Engineering)')
-    } else if (asset === 'AF-0088 - iPad Pro') {
-      setIsAllocated(true)
-      setFromEmpName('Marcus V.')
-      setAllocatedUser('Marcus V. (Facilities)')
-    } else {
-      setIsAllocated(false)
-      setFromEmpName('')
-      setAllocatedUser('')
-    }
-  }
-
-  // Handle transfer form submit
-  const handleTransferSubmit = (e) => {
-    e.preventDefault()
-    if (!toEmpName || !transferReason) return
-
-    const newEvent = {
-      date: 'Jul 12',
-      desc: `Transfer requested to ${toEmpName} - Reason: ${transferReason}`
-    }
-
-    setHistories(prev => ({
-      ...prev,
-      [transferAsset]: [newEvent, ...(prev[transferAsset] || [])]
-    }))
-
-    // Also add to dashboard activities list to show integration!
-    const newActivity = {
-      id: Date.now(),
-      text: `Transfer request: ${transferAsset} from ${fromEmpName} to ${toEmpName}`,
-      time: 'Just now',
-      type: 'booking'
-    }
-    setActivities(prev => [newActivity, ...prev])
-
-    setTransferSuccessMsg(`Transfer request submitted successfully.`)
-    setToEmpName('')
-    setTransferReason('')
-  }
   
   // Organization tab states
   const [orgTab, setOrgTab] = useState('Departments')
@@ -137,6 +65,14 @@ export default function Dashboard({ user, onLogout }) {
   const [bookingStartTime, setBookingStartTime] = useState('11:00')
   const [bookingEndTime, setBookingEndTime] = useState('12:00')
   const [bookingTeamName, setBookingTeamName] = useState('Operations Team')
+
+  // Screen 8 Asset Audit states
+  const [auditCycleClosed, setAuditCycleClosed] = useState(false)
+  const [auditAssets, setAuditAssets] = useState([
+    { id: 'AF-003', name: 'AF-003 Dell laptop', location: 'Desk E12', verification: 'Verified' },
+    { id: 'AF-9921', name: 'AF-9921 Office chair', location: 'Desk E14', verification: 'Missing' },
+    { id: 'AF-9838', name: 'AF-9838 Monitor', location: 'Desk E15', verification: 'Damaged' }
+  ])
 
   // Dynamic stats state
   const [stats, setStats] = useState({
@@ -346,8 +282,6 @@ export default function Dashboard({ user, onLogout }) {
   // Handle timeline slot booking
   const handleCreateTimelineBooking = (e) => {
     e.preventDefault()
-    
-    // Check for conflict with 9:00-10:00 slot
     const hasConflict = 
       (bookingStartTime >= '09:00' && bookingStartTime < '10:00') ||
       (bookingEndTime > '09:00' && bookingEndTime <= '10:00') ||
@@ -366,8 +300,6 @@ export default function Dashboard({ user, onLogout }) {
     }
 
     setBookings([...bookings, newBooking])
-    
-    // Add to activity feed
     const newAct = {
       id: Date.now(),
       text: hasConflict
@@ -377,8 +309,38 @@ export default function Dashboard({ user, onLogout }) {
       type: hasConflict ? 'maintenance' : 'booking'
     }
     setActivities([newAct, ...activities])
-
     setShowNewBookingModal(false)
+  }
+
+  // Toggle Verification status for interactive checklist
+  const handleToggleVerification = (id) => {
+    if (auditCycleClosed) return
+    setAuditAssets(auditAssets.map(asset => {
+      if (asset.id === id) {
+        let nextStatus = 'Verified'
+        if (asset.verification === 'Verified') nextStatus = 'Missing'
+        else if (asset.verification === 'Missing') nextStatus = 'Damaged'
+        return { ...asset, verification: nextStatus }
+      }
+      return asset
+    }))
+  }
+
+  // Calculate discrepancy count
+  const discrepancyCount = auditAssets.filter(
+    a => a.verification === 'Missing' || a.verification === 'Damaged'
+  ).length
+
+  // Handle close audit cycle
+  const handleCloseAuditCycle = () => {
+    setAuditCycleClosed(true)
+    const newAct = {
+      id: Date.now(),
+      text: `Q3 Audit Cycle Closed with ${discrepancyCount} discrepancies flagged`,
+      time: 'Just now',
+      type: 'maintenance'
+    }
+    setActivities([newAct, ...activities])
   }
 
   // Menu items matching the wireframe
@@ -719,7 +681,6 @@ export default function Dashboard({ user, onLogout }) {
                 <div className="timeline-slot-row">
                   <div className="timeline-hour-col">10:00</div>
                   <div className="timeline-card-col relative-col">
-                    {/* The conflict box overlaps 9:30 to 10:30 */}
                     {bookings
                       .filter(b => b.resource === selectedResource && b.type === 'conflict')
                       .map(b => (
@@ -785,108 +746,86 @@ export default function Dashboard({ user, onLogout }) {
                 </button>
               </div>
             </div>
-          ) : activeMenu === 'Allocation & Transfer' ? (
-            <div className="transfer-view-container">
-              {/* Asset selector dropdown */}
-              <div className="form-group-wire" style={{ textAlign: 'left', marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '13px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Asset</label>
-                <select 
-                  value={transferAsset}
-                  onChange={(e) => handleAssetChange(e.target.value)}
-                  style={{ fontSize: '14.5px', padding: '10px' }}
-                >
-                  <option value="AF-0114 - Dell laptop">AF-0114 - Dell laptop</option>
-                  <option value="AF-0088 - iPad Pro">AF-0088 - iPad Pro</option>
-                  <option value="AF-0062 - Projector">AF-0062 - Projector</option>
-                </select>
+          ) : activeMenu === 'Audit' ? (
+            <div className="audit-view-container">
+              {/* Q3 audit cycle info box matching Screen 8 */}
+              <div className="audit-cycle-info-box">
+                <div className="audit-cycle-title">Q3 audit: Engineering dept - 1-15 jul</div>
+                <div className="audit-cycle-auditors">Auditors: A. Rao, S. Iqbal</div>
               </div>
 
-              {/* Blocked allocation banner */}
-              {isAllocated && (
-                <div className="transfer-blocked-alert">
-                  <div className="transfer-blocked-alert-title">
-                    Already Allocated to {allocatedUser}
+              {/* Verification Checklist Table */}
+              <div className="audit-table-responsive-wrapper">
+                <table className="audit-data-table-wire">
+                  <thead>
+                    <tr>
+                      <th>Asset</th>
+                      <th>Expected location</th>
+                      <th className="verification-col-header">Verification</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {auditAssets.map((asset) => (
+                      <tr key={asset.id}>
+                        <td className="font-semibold-wire">{asset.name}</td>
+                        <td className="text-muted-wire">{asset.location}</td>
+                        <td className="verification-cell-wire">
+                          <button
+                            type="button"
+                            className={`audit-status-oval ${asset.verification.toLowerCase()}`}
+                            onClick={() => handleToggleVerification(asset.id)}
+                            title="Click to toggle status (Verified -> Missing -> Damaged)"
+                            disabled={auditCycleClosed}
+                          >
+                            {asset.verification}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Divider and Alert Banner */}
+              <div className="audit-horizontal-divider"></div>
+              
+              {!auditCycleClosed ? (
+                <>
+                  {discrepancyCount > 0 ? (
+                    <div className="discrepancy-banner-alert">
+                      <AlertTriangle size={18} className="alert-banner-icon" />
+                      <span className="alert-banner-text">
+                        {discrepancyCount} assets flagged - discrepancy report generated automatically
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="discrepancy-banner-alert success-theme">
+                      <CheckCircle size={18} className="alert-banner-icon success-theme" />
+                      <span className="alert-banner-text">
+                        No discrepancies flagged - system verified
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Close Audit Cycle button */}
+                  <div className="audit-footer-action-row">
+                    <button
+                      className="audit-primary-action-btn"
+                      onClick={handleCloseAuditCycle}
+                    >
+                      Close audit cycle
+                    </button>
                   </div>
-                  <div className="transfer-blocked-alert-body">
-                    Direct re-allocation is blocked - submit a transfer request below
-                  </div>
+                </>
+              ) : (
+                <div className="discrepancy-banner-alert closed-theme">
+                  <CheckCircle size={18} className="alert-banner-icon closed-theme" />
+                  <span className="alert-banner-text">
+                    Audit Cycle Closed Successfully - {discrepancyCount} discrepancies recorded in discrepancy report
+                  </span>
                 </div>
               )}
 
-              {/* Transfer Request Area */}
-              <section style={{ background: '#ffffff', border: '1.5px solid var(--border-color)', borderRadius: 'var(--border-radius)', padding: '24px', boxShadow: 'var(--box-shadow)' }}>
-                <h2 className="transfer-section-title">Transfer Request</h2>
-                
-                {transferSuccessMsg && (
-                  <div className="org-status-oval active" style={{ display: 'block', padding: '10px 14px', borderRadius: '6px', textAlign: 'left', marginBottom: '16px', border: '1px solid #70ad47', background: '#e2f0d9' }}>
-                    <strong>Success:</strong> {transferSuccessMsg}
-                  </div>
-                )}
-
-                <form onSubmit={handleTransferSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div className="transfer-grid-row">
-                    <div className="form-group-wire">
-                      <label>From</label>
-                      <input 
-                        type="text" 
-                        value={isAllocated ? fromEmpName : 'Not Allocated'} 
-                        disabled 
-                        style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
-                      />
-                    </div>
-                    <div className="form-group-wire">
-                      <label>To</label>
-                      <select 
-                        value={toEmpName}
-                        onChange={(e) => setToEmpName(e.target.value)}
-                        required={isAllocated}
-                        disabled={!isAllocated}
-                      >
-                        <option value="">Select Employee....</option>
-                        {employees
-                          .filter(emp => emp.name !== fromEmpName)
-                          .map((emp, index) => (
-                            <option key={index} value={emp.name}>{emp.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group-wire" style={{ marginBottom: '16px' }}>
-                    <label>Reason</label>
-                    <textarea 
-                      rows="4"
-                      value={transferReason}
-                      onChange={(e) => setTransferReason(e.target.value)}
-                      placeholder="Specify reason..."
-                      required={isAllocated}
-                      disabled={!isAllocated}
-                    ></textarea>
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="transfer-submit-btn"
-                    disabled={!isAllocated}
-                    style={{ opacity: isAllocated ? 1 : 0.5, cursor: isAllocated ? 'pointer' : 'not-allowed' }}
-                  >
-                    Submit Request
-                  </button>
-                </form>
-              </section>
-
-              {/* Allocation History */}
-              <section className="history-section-wire">
-                <h3>Allocation history</h3>
-                <div className="history-divider"></div>
-                <ul className="history-list">
-                  {(histories[transferAsset] || []).map((item, index) => (
-                    <li key={index} className="history-item">
-                      {item.date} - {item.desc}
-                    </li>
-                  ))}
-                </ul>
-              </section>
             </div>
           ) : (
             <div className="fallback-wire-container">
