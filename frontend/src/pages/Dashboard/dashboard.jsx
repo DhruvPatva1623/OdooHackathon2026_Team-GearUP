@@ -8,371 +8,390 @@ import {
   Wrench,
   ShieldCheck,
   FileBarChart,
-  Search,
   Bell,
-  Settings,
-  ChevronDown,
+  Plus,
+  AlertTriangle,
   ChevronRight,
-  HardDrive,
-  LogOut
+  BookOpen,
+  Send,
+  CheckCircle,
+  X
 } from 'lucide-react'
 import './dashboard.css'
 
 export default function Dashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('Dashboard')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [showRequestModal, setShowRequestModal] = useState(false)
+  
+  // Dynamic stats state
+  const [stats, setStats] = useState({
+    available: 128,
+    allocated: 76,
+    overdue: 4,
+    activeBookings: 9,
+    pendingTransfers: 3,
+    upcomingReturns: 12
+  })
 
-  // Mock activity data matching the image
-  const activities = [
+  // Mock activity feed matching wireframe
+  const [activities, setActivities] = useState([
     {
       id: 1,
-      type: 'ASSIGN',
-      details: 'Laptop AF-0014 assigned',
-      actor: 'Priya Shah',
-      date: '24m ago',
-      initials: 'PS'
+      text: 'Laptop AF-0114 - allocated to Priya shah - IT dept',
+      time: '24m ago',
+      type: 'allocation'
     },
     {
       id: 2,
-      type: 'BOOKING',
-      details: 'Room B2 reservation confirmed',
-      actor: 'Marcus V.',
-      date: '1h ago',
-      initials: 'MV'
+      text: 'Room B2 - booking confirmed - 2:00 to 3:00 PM',
+      time: '1h ago',
+      type: 'booking'
     },
     {
       id: 3,
-      type: 'REPAIR',
-      details: 'Projector maintenance completed',
-      actor: 'Tech Support',
-      date: '3h ago',
-      initials: 'TS'
+      text: 'Projector AF-0062 - maintenance resolved',
+      time: '3h ago',
+      type: 'maintenance'
     }
-  ]
+  ])
 
-  // Menu list matching the image
+  // Form states
+  const [newAssetName, setNewAssetName] = useState('')
+  const [newAssetTag, setNewAssetTag] = useState('')
+  const [bookingRoom, setBookingRoom] = useState('Room B2')
+  const [bookingTime, setBookingTime] = useState('2:00 to 3:00 PM')
+  const [requestText, setRequestText] = useState('')
+
+  // Handle register asset submission
+  const handleRegisterAsset = (e) => {
+    e.preventDefault()
+    if (!newAssetName || !newAssetTag) return
+    
+    // Increment available count
+    setStats(prev => ({ ...prev, available: prev.available + 1 }))
+    
+    // Add activity
+    const newAct = {
+      id: Date.now(),
+      text: `${newAssetName} (${newAssetTag}) - registered successfully in system`,
+      time: 'Just now',
+      type: 'allocation'
+    }
+    setActivities([newAct, ...activities])
+    
+    // Reset form & close
+    setNewAssetName('')
+    setNewAssetTag('')
+    setShowRegisterModal(false)
+  }
+
+  // Handle room booking submission
+  const handleBookResource = (e) => {
+    e.preventDefault()
+    
+    setStats(prev => ({ ...prev, activeBookings: prev.activeBookings + 1 }))
+    
+    const newAct = {
+      id: Date.now(),
+      text: `${bookingRoom} - booking confirmed - ${bookingTime}`,
+      time: 'Just now',
+      type: 'booking'
+    }
+    setActivities([newAct, ...activities])
+    
+    setShowBookingModal(false)
+  }
+
+  // Handle raise request submission
+  const handleRaiseRequest = (e) => {
+    e.preventDefault()
+    if (!requestText) return
+    
+    setStats(prev => ({ ...prev, pendingTransfers: prev.pendingTransfers + 1 }))
+    
+    const newAct = {
+      id: Date.now(),
+      text: `Maintenance request raised: "${requestText}"`,
+      time: 'Just now',
+      type: 'maintenance'
+    }
+    setActivities([newAct, ...activities])
+    
+    setRequestText('')
+    setShowRequestModal(false)
+  }
+
+  // Menu items matching the wireframe
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
-    { name: 'Organization', icon: Building2 },
+    { name: 'Organization setup', icon: Building2 },
     { name: 'Assets', icon: Laptop },
-    { name: 'Transfers', icon: ArrowLeftRight },
+    { name: 'Allocation & Transfer', icon: ArrowLeftRight },
     { name: 'Resource Booking', icon: Calendar },
     { name: 'Maintenance', icon: Wrench },
     { name: 'Audit', icon: ShieldCheck },
-    { name: 'Reports', icon: FileBarChart }
+    { name: 'Reports', icon: FileBarChart },
+    { name: 'Notifications', icon: Bell }
   ]
 
   return (
-    <div className="dashboard-layout">
-      {/* Top Header Bar */}
-      <header className="dashboard-top-bar">
-        <div className="header-left">
-          <div className="logo-brand">AssetFlow</div>
-          <div className="header-search-wrapper">
-            <Search className="search-bar-icon" size={16} />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        </div>
-
-        <div className="header-right">
-          <button className="icon-header-btn" title="Alerts & Telemetry">
-            <Bell size={18} />
-          </button>
-          <button className="icon-header-btn" title="System Settings">
-            <Settings size={18} />
-          </button>
-          
-          <div className="user-profile-dropdown">
-            <div className="user-avatar-circle">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100"
-                alt="Alex Chen"
-                className="avatar-img"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://ui-avatars.com/api/?name=Alex+Chen&background=6d28d9&color=fff";
-                }}
-              />
-            </div>
-            <span className="profile-name">{user?.name || 'Alex Chen'}</span>
-            <ChevronDown size={14} className="dropdown-arrow-icon" />
-            
-            <div className="profile-hover-menu">
-              <button onClick={onLogout} className="logout-menu-item">
-                <LogOut size={14} /> Sign Out
-              </button>
-            </div>
-          </div>
+    <div className="dashboard-app-frame">
+      {/* Top Header */}
+      <header className="wireframe-header">
+        <div className="header-logo-title">AssetFlow</div>
+        <div className="header-user-status">
+          <span className="user-online-badge"></span>
+          <span className="user-display-name">{user?.name || 'Alex Chen'}</span>
+          <button className="logout-action-btn" onClick={onLogout}>Logout</button>
         </div>
       </header>
 
-      <div className="dashboard-body">
+      <div className="dashboard-app-body">
         {/* Left Sidebar */}
-        <aside className="dashboard-sidebar">
-          {/* Organization Widget */}
-          <div className="sidebar-org-box">
-            <div className="org-icon-avatar">GE</div>
-            <div className="org-details">
-              <div className="org-name">Global Enterprise</div>
-              <div className="org-region">MUMBAI REGION B</div>
-            </div>
-          </div>
-
-          {/* Sidebar Menu Items */}
-          <nav className="sidebar-nav-menu">
+        <aside className="wireframe-sidebar">
+          <nav className="sidebar-nav-list">
             {menuItems.map((item) => {
               const Icon = item.icon
               return (
                 <button
                   key={item.name}
-                  className={`sidebar-nav-btn ${activeMenu === item.name ? 'active' : ''}`}
+                  className={`sidebar-nav-item-btn ${activeMenu === item.name ? 'active' : ''}`}
                   onClick={() => setActiveMenu(item.name)}
                 >
-                  <Icon size={18} className="menu-icon" />
+                  <Icon size={16} className="menu-nav-icon" />
                   <span>{item.name}</span>
                 </button>
               )
             })}
           </nav>
-
-          {/* Storage Indicator at bottom */}
-          <div className="sidebar-bottom-indicator">
-            <div className="indicator-label-row">
-              <span className="indicator-title">Storage</span>
-              <span className="indicator-percentage">76%</span>
-            </div>
-            <div className="indicator-progress-track">
-              <div className="indicator-progress-fill" style={{ width: '76%' }}></div>
-            </div>
-          </div>
         </aside>
 
-        {/* Main Dashboard Content */}
-        <main className="dashboard-main-content">
+        {/* Main Workspace */}
+        <main className="wireframe-main-content">
           {activeMenu === 'Dashboard' ? (
-            <div className="dashboard-grid-view">
+            <div className="dashboard-view-container">
               
-              {/* Row 1 Left: Recent Activity */}
-              <section className="dashboard-card recent-activity-card">
-                <div className="card-header-row">
-                  <h3 className="card-title">Recent Activity</h3>
-                  <a href="#logs" className="card-action-link">View All Logs</a>
-                </div>
-
-                <div className="table-responsive-container">
-                  <table className="activity-table-ui">
-                    <thead>
-                      <tr>
-                        <th>Event</th>
-                        <th>Details</th>
-                        <th>Actor</th>
-                        <th>Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activities.map((act) => (
-                        <tr key={act.id}>
-                          <td>
-                            <span className={`event-badge-label ${act.type.toLowerCase()}`}>
-                              {act.type}
-                            </span>
-                          </td>
-                          <td className="event-details-text">{act.details}</td>
-                          <td>
-                            <div className="actor-profile-row">
-                              <span className="actor-avatar-circle">{act.initials}</span>
-                              <span className="actor-name-text">{act.actor}</span>
-                            </div>
-                          </td>
-                          <td className="event-date-text">{act.date}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              {/* Row 1 Right: Quick Actions */}
-              <section className="dashboard-card quick-actions-card">
-                <h3 className="card-title">Quick Actions</h3>
+              {/* Today's Overview Section */}
+              <section className="overview-section">
+                <h2 className="section-main-heading">Today's Overview</h2>
                 
-                <div className="quick-action-buttons-list">
-                  <button className="quick-action-link-btn">
-                    <div className="btn-left-content">
-                      <Laptop size={18} className="action-btn-icon" />
-                      <span>Register New Asset</span>
-                    </div>
-                    <ChevronRight size={16} className="chevron-indicator" />
-                  </button>
-
-                  <button className="quick-action-link-btn">
-                    <div className="btn-left-content">
-                      <Calendar size={18} className="action-btn-icon" />
-                      <span>Book Resource</span>
-                    </div>
-                    <ChevronRight size={16} className="chevron-indicator" />
-                  </button>
-
-                  <button className="quick-action-link-btn">
-                    <div className="btn-left-content">
-                      <Wrench size={18} className="action-btn-icon" />
-                      <span>Maintenance Request</span>
-                    </div>
-                    <ChevronRight size={16} className="chevron-indicator" />
-                  </button>
-                </div>
-
-                {/* Isometric quick overview illustration box */}
-                <div className="isometric-overview-box">
-                  <div className="isometric-box-title">QUICK OVERVIEW</div>
-                  <div className="isometric-svg-wrapper">
-                    <svg viewBox="0 0 320 160" fill="none" stroke="currentColor" strokeWidth="1.2" className="isometric-vector-svg">
-                      {/* Isometric Grid Floor lines */}
-                      <path d="M 160 20 L 280 80 L 160 140 L 40 80 Z" stroke="#e4e4e7" />
-                      <path d="M 80 50 L 200 110" stroke="#f4f4f5" />
-                      <path d="M 120 35 L 240 95" stroke="#f4f4f5" />
-                      <path d="M 200 50 L 80 110" stroke="#f4f4f5" />
-                      <path d="M 240 35 L 120 95" stroke="#f4f4f5" />
-
-                      {/* Cubes / Server blocks */}
-                      {/* Server Block 1 (Left) */}
-                      <g transform="translate(100, 65)">
-                        <polygon points="0,-20 20,-10 0,0 -20,-10" fill="#fcfcfc" stroke="#a1a1aa" />
-                        <polygon points="-20,-10 0,0 0,25 -20,15" fill="#f4f4f5" stroke="#a1a1aa" />
-                        <polygon points="0,0 20,-10 20,15 0,25" fill="#e4e4e7" stroke="#a1a1aa" />
-                        {/* Server panel lines */}
-                        <line x1="-12" y1="-2" x2="-4" y2="2" stroke="#71717a" strokeWidth="1" />
-                        <line x1="-12" y1="3" x2="-4" y2="7" stroke="#71717a" strokeWidth="1" />
-                        <line x1="-12" y1="8" x2="-4" y2="12" stroke="#71717a" strokeWidth="1" />
-                      </g>
-
-                      {/* Server Block 2 (Center-Right) */}
-                      <g transform="translate(180, 75)">
-                        <polygon points="0,-30 30,-15 0,0 -30,-15" fill="#fcfcfc" stroke="#71717a" />
-                        <polygon points="-30,-15 0,0 0,35 -30,20" fill="#f4f4f5" stroke="#71717a" />
-                        <polygon points="0,0 30,-15 30,20 0,35" fill="#e4e4e7" stroke="#71717a" />
-                        {/* Server lights detail */}
-                        <circle cx="10" cy="5" r="1.5" fill="#6d28d9" stroke="none" />
-                        <circle cx="20" cy="0" r="1.5" fill="#3b82f6" stroke="none" />
-                        <line x1="-20" y1="-5" x2="-5" y2="2" stroke="#a1a1aa" />
-                        <line x1="-20" y1="2" x2="-5" y2="9" stroke="#a1a1aa" />
-                        <line x1="-20" y1="9" x2="-5" y2="16" stroke="#a1a1aa" />
-                      </g>
-
-                      {/* Laptop / Console Box (Front) */}
-                      <g transform="translate(140, 110)">
-                        <polygon points="0,-8 12,-2 0,4 -12,-2" fill="#ffffff" stroke="#71717a" />
-                        <polygon points="-12,-2 0,4 0,8 -12,2" fill="#f4f4f5" stroke="#71717a" />
-                        <polygon points="0,4 12,-2 12,4 0,8" fill="#e4e4e7" stroke="#71717a" />
-                        {/* Open screen */}
-                        <polygon points="-2,-6 -2,-18 6,-14 6,-2" fill="#f4f4f5" stroke="#71717a" />
-                        <polygon points="0,-8 0,-16 4,-14 4,-6" fill="#ffffff" stroke="#6d28d9" strokeWidth="0.5" />
-                      </g>
-                    </svg>
-                  </div>
-                </div>
-              </section>
-
-              {/* Row 2 Left: Asset Distribution Map */}
-              <section className="dashboard-card asset-distribution-card">
-                <h3 className="card-title">Asset Distribution</h3>
-                
-                <div className="map-visualization-area">
-                  {/* Grid Lines Overlay */}
-                  <div className="grid-overlay"></div>
+                {/* 2x3 Grid Cards */}
+                <div className="overview-stats-grid">
                   
-                  {/* Map Schematic Drawing */}
-                  <svg viewBox="0 0 450 260" fill="none" stroke="currentColor" className="blueprint-map-svg">
-                    {/* Outline floor plan */}
-                    <rect x="20" y="20" width="410" height="220" rx="6" stroke="#e4e4e7" strokeWidth="1" strokeDasharray="3 3" />
-                    <rect x="40" y="40" width="370" height="180" rx="4" stroke="#f4f4f5" strokeWidth="1.2" />
-                    
-                    {/* Partition walls */}
-                    <line x1="140" y1="40" x2="140" y2="180" stroke="#f4f4f5" strokeWidth="1.2" />
-                    <line x1="280" y1="80" x2="280" y2="220" stroke="#f4f4f5" strokeWidth="1.2" />
-                    <line x1="140" y1="120" x2="220" y2="120" stroke="#f4f4f5" strokeWidth="1.2" />
-                    
-                    {/* Furniture / Desks outlines */}
-                    <rect x="60" y="60" width="50" height="30" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
-                    <rect x="60" y="110" width="50" height="30" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
-                    <rect x="170" y="60" width="80" height="40" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
-                    <rect x="310" y="140" width="70" height="40" rx="2" stroke="#e4e4e7" strokeWidth="0.8" />
-                    
-                    {/* Pulse glowing blue/violet point in center */}
-                    <g transform="translate(225, 130)">
-                      <circle cx="0" cy="0" r="16" fill="rgba(109, 40, 217, 0.12)" className="pulse-map-glow-slow" />
-                      <circle cx="0" cy="0" r="8" fill="rgba(109, 40, 217, 0.25)" className="pulse-map-glow-fast" />
-                      <circle cx="0" cy="0" r="3.5" fill="#6d28d9" />
-                    </g>
-                  </svg>
+                  {/* Card 1: Available */}
+                  <div className="stat-overview-card theme-green">
+                    <div className="stat-card-label">Available</div>
+                    <div className="stat-card-value">{stats.available}</div>
+                  </div>
 
-                  <div className="map-bottom-tag">Map Display Active - All Systems</div>
+                  {/* Card 2: Allocated */}
+                  <div className="stat-overview-card theme-blue">
+                    <div className="stat-card-label">Allocated</div>
+                    <div className="stat-card-value">{stats.allocated}</div>
+                  </div>
+
+                  {/* Card 3: Overdue */}
+                  <div className="stat-overview-card theme-red">
+                    <div className="stat-card-label">Overdue</div>
+                    <div className="stat-card-value">{stats.overdue}</div>
+                  </div>
+
+                  {/* Card 4: Active Bookings */}
+                  <div className="stat-overview-card theme-purple">
+                    <div className="stat-card-label">Active Bookings</div>
+                    <div className="stat-card-value">{stats.activeBookings}</div>
+                  </div>
+
+                  {/* Card 5: Pending Transfers */}
+                  <div className="stat-overview-card theme-teal">
+                    <div className="stat-card-label">Pending Transfers</div>
+                    <div className="stat-card-value">{stats.pendingTransfers}</div>
+                  </div>
+
+                  {/* Card 6: Upcoming returns */}
+                  <div className="stat-overview-card theme-orange">
+                    <div className="stat-card-label">Upcoming returns</div>
+                    <div className="stat-card-value">{stats.upcomingReturns}</div>
+                  </div>
+
                 </div>
               </section>
 
-              {/* Row 2 Right: Maintenance Insights */}
-              <section className="dashboard-card maintenance-insights-card">
-                <h3 className="card-title">Maintenance Insights</h3>
-                <p className="card-subtitle-desc">Infrastructure health metrics and regional repair efficiency.</p>
+              {/* Overdue alert banner */}
+              <div className="overdue-banner-alert">
+                <AlertTriangle size={18} className="alert-banner-icon" />
+                <span className="alert-banner-text">
+                  3 assets overdue for return - flagged for follow-up
+                </span>
+              </div>
 
-                <div className="insights-metrics-bars">
-                  {/* Progress Metric 1 */}
-                  <div className="progress-metric-item">
-                    <div className="metric-header-row">
-                      <span className="metric-name-title">INFRASTRUCTURE HEALTH</span>
-                      <span className="metric-value-num">98.2%</span>
+              {/* Quick Actions Row */}
+              <div className="dashboard-quick-actions-row">
+                <button 
+                  className="quick-action-btn primary-action"
+                  onClick={() => setShowRegisterModal(true)}
+                >
+                  <Plus size={16} />
+                  <span>register asset</span>
+                </button>
+
+                <button 
+                  className="quick-action-btn secondary-action"
+                  onClick={() => setShowBookingModal(true)}
+                >
+                  <BookOpen size={16} />
+                  <span>Book resource</span>
+                </button>
+
+                <button 
+                  className="quick-action-btn secondary-action"
+                  onClick={() => setShowRequestModal(true)}
+                >
+                  <Send size={16} />
+                  <span>Raise requests</span>
+                </button>
+              </div>
+
+              {/* Recent Activity Section */}
+              <section className="recent-activity-wire-section">
+                <h3 className="section-secondary-heading">Recent Activity</h3>
+                
+                <div className="activity-wire-lines-list">
+                  {activities.map((act) => (
+                    <div key={act.id} className="activity-wire-line-item">
+                      <div className={`activity-status-dot ${act.type}`}></div>
+                      <p className="activity-line-text">{act.text}</p>
+                      <span className="activity-time-tag">{act.time}</span>
                     </div>
-                    <div className="thick-progress-track health-track">
-                      <div className="thick-progress-fill health-fill" style={{ width: '98.2%' }}></div>
-                    </div>
-                  </div>
-
-                  {/* Progress Metric 2 */}
-                  <div className="progress-metric-item">
-                    <div className="metric-header-row">
-                      <span className="metric-name-title">AVG. REPAIR TIME</span>
-                      <span className="metric-value-num">2.4 hrs</span>
-                    </div>
-                    <div className="thick-progress-track repair-track">
-                      <div className="thick-progress-fill repair-fill" style={{ width: '24%' }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Grid of 3 Stat Blocks */}
-                <div className="insights-stats-row-grid">
-                  <div className="stat-value-block">
-                    <div className="block-title">LAST DATA</div>
-                    <div className="block-value-text text-dark">2m ago</div>
-                  </div>
-
-                  <div className="stat-value-block">
-                    <div className="block-title">STATUS</div>
-                    <div className="block-value-text text-green">optimal</div>
-                  </div>
-
-                  <div className="stat-value-block">
-                    <div className="block-title">NET VALUE</div>
-                    <div className="block-value-text text-red">$34.2M</div>
-                  </div>
+                  ))}
                 </div>
               </section>
 
             </div>
           ) : (
-            <div className="fallback-tab-content">
-              <h2 className="fallback-tab-title">{activeMenu} Section</h2>
-              <p className="fallback-tab-desc">This interface is under active development. Select "Dashboard" from the menu to see the main view.</p>
+            <div className="fallback-wire-container">
+              <h2 className="fallback-wire-title">{activeMenu}</h2>
+              <p className="fallback-wire-desc">
+                The {activeMenu} interface is currently under active layout construction. Please toggle back to the "Dashboard" menu to view the overview.
+              </p>
             </div>
           )}
         </main>
       </div>
+
+      {/* Register Asset Modal */}
+      {showRegisterModal && (
+        <div className="modal-overlay-wire">
+          <div className="modal-card-wire">
+            <div className="modal-header-wire">
+              <h3>Register New System Asset</h3>
+              <button className="modal-close-wire" onClick={() => setShowRegisterModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleRegisterAsset} className="modal-form-wire">
+              <div className="form-group-wire">
+                <label>Asset Name</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. iPad Pro M4"
+                  value={newAssetName}
+                  onChange={(e) => setNewAssetName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group-wire">
+                <label>Asset Serial / Tag</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. AF-0129"
+                  value={newAssetTag}
+                  onChange={(e) => setNewAssetTag(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="modal-actions-wire">
+                <button type="button" className="modal-btn-cancel" onClick={() => setShowRegisterModal(false)}>Cancel</button>
+                <button type="submit" className="modal-btn-submit">Add Asset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Book Resource Modal */}
+      {showBookingModal && (
+        <div className="modal-overlay-wire">
+          <div className="modal-card-wire">
+            <div className="modal-header-wire">
+              <h3>Book Shared Resource</h3>
+              <button className="modal-close-wire" onClick={() => setShowBookingModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleBookResource} className="modal-form-wire">
+              <div className="form-group-wire">
+                <label>Select Room / Device</label>
+                <select 
+                  value={bookingRoom}
+                  onChange={(e) => setBookingRoom(e.target.value)}
+                >
+                  <option value="Room B2">Room B2 (Conference Room)</option>
+                  <option value="Server Room A">Server Room A (Access)</option>
+                  <option value="Projector AF-0062">Projector AF-0062</option>
+                  <option value="Development Lab 3">Development Lab 3</option>
+                </select>
+              </div>
+              <div className="form-group-wire">
+                <label>Time Slot</label>
+                <input 
+                  type="text" 
+                  value={bookingTime}
+                  onChange={(e) => setBookingTime(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="modal-actions-wire">
+                <button type="button" className="modal-btn-cancel" onClick={() => setShowBookingModal(false)}>Cancel</button>
+                <button type="submit" className="modal-btn-submit">Confirm Booking</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Raise Request Modal */}
+      {showRequestModal && (
+        <div className="modal-overlay-wire">
+          <div className="modal-card-wire">
+            <div className="modal-header-wire">
+              <h3>Raise Maintenance / Transfer Request</h3>
+              <button className="modal-close-wire" onClick={() => setShowRequestModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleRaiseRequest} className="modal-form-wire">
+              <div className="form-group-wire">
+                <label>Describe Request / Issue</label>
+                <textarea 
+                  rows="3"
+                  placeholder="e.g. Laptop charger replacement or request room access keys..."
+                  value={requestText}
+                  onChange={(e) => setRequestText(e.target.value)}
+                  required
+                ></textarea>
+              </div>
+              <div className="modal-actions-wire">
+                <button type="button" className="modal-btn-cancel" onClick={() => setShowRequestModal(false)}>Cancel</button>
+                <button type="submit" className="modal-btn-submit">Submit Request</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
