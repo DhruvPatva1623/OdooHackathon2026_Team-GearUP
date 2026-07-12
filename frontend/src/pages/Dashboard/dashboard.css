@@ -554,3 +554,192 @@
 .modal-btn-submit:hover {
   background: #d4e8c8;
 }
+
+/* ==========================================================================
+   Screen 3 - Organization Setup Styles
+   ========================================================================== */
+
+.org-setup-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+@keyframes fade-in-up-org {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.org-tabs-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1.5px solid var(--border-color);
+  padding-bottom: 14px;
+}
+
+.org-tabs-left-side {
+  display: flex;
+  gap: 8px;
+}
+
+.org-tab-toggle-btn {
+  background: transparent;
+  border: 1.5px solid var(--border-color);
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  color: var(--text-main);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+
+.org-tab-toggle-btn:hover {
+  background: #f1f5f9;
+}
+
+/* active tab is shaded green in wireframe */
+.org-tab-toggle-btn.active {
+  background: #e2f0d9;
+  border-color: #70ad47;
+  color: #385723;
+}
+
+/* + Add action button is shaded green in wireframe */
+.org-add-new-action-btn {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+}
+
+.org-add-new-action-btn:hover {
+  background: #d4e8c8;
+}
+
+/* Table styles matching hand-drawn wireframe clean borders */
+.org-table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  background: #ffffff;
+}
+
+.org-data-table-wire {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.org-data-table-wire th {
+  background: #f8fafc;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1.5px solid var(--border-color);
+}
+
+.org-data-table-wire td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: var(--text-main);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.org-data-table-wire tr:last-child td {
+  border-bottom: none;
+}
+
+.font-semibold-wire {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.text-muted-wire {
+  color: var(--text-muted);
+}
+
+/* Oval status badges from hand-drawn style */
+.org-status-oval {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border: 1.2px solid transparent;
+}
+
+.org-status-oval.active {
+  background: #e2f0d9;
+  border-color: #a9d18e;
+  color: #385723;
+}
+
+.org-status-oval.inactive {
+  background: #f2f2f2;
+  border-color: #bfbfbf;
+  color: #595959;
+}
+
+/* Edit and Delete action controls */
+.action-col-wire {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.org-row-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+}
+
+.org-row-btn:hover {
+  background: #f1f5f9;
+}
+
+.org-row-btn.edit:hover {
+  color: var(--text-main);
+}
+
+.org-row-btn.delete:hover {
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+/* Divider & helper text */
+.org-horizontal-divider {
+  border-top: 1.5px solid var(--border-color);
+  margin-top: 8px;
+}
+
+.org-setup-footer-note {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-main);
+  margin-top: 4px;
+  font-weight: 500;
+}
