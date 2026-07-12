@@ -878,7 +878,7 @@
 }
 
 .booking-block-text {
-  flex-content: 1;
+  flex-grow: 1;
 }
 
 /* Bottom Book a Slot button row */
@@ -1069,3 +1069,216 @@
 .audit-primary-action-btn:hover {
   background: #d4e8c8;
 }
+
+/* ==========================================================================
+   Screen 5 - Allocation & Transfer Styles
+   ========================================================================== */
+
+.transfer-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+.transfer-blocked-alert {
+  background-color: var(--red-bg);
+  border: 1.5px solid var(--red-border);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  color: var(--red-text);
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.transfer-blocked-alert-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-bottom: 2px;
+}
+
+.transfer-blocked-alert-body {
+  font-size: 13.5px;
+}
+
+.transfer-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.transfer-grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.transfer-submit-btn {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: var(--transition);
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.transfer-submit-btn:hover {
+  background: #d4e8c8;
+}
+
+.history-section-wire {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.history-section-wire h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.history-divider {
+  border-top: 1.5px solid var(--border-color);
+  margin: 10px 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.history-item {
+  font-size: 13.5px;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Screen 10 - Activity logs & Notifications Styles
+   ========================================================================== */
+
+.notifications-view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fade-in-up-org 0.4s ease-out;
+}
+
+.notif-filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.notif-filter-btn {
+  background: transparent;
+  border: 1.5px solid var(--border-color);
+  border-radius: 18px;
+  padding: 6px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-family);
+}
+
+.notif-filter-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.notif-filter-btn.active {
+  background: #e2f0d9;
+  border: 1.5px solid #70ad47;
+  color: #385723;
+}
+
+.notifications-list-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notification-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: var(--transition);
+}
+
+.notification-row-item:last-child {
+  border-bottom: none;
+}
+
+.notification-row-item:hover {
+  background: #f8fafc;
+}
+
+.notification-left-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.notification-check-box {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.notification-status-color-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.notification-message-text {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.notification-message-text.read {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.notification-right-block {
+  display: flex;
+  align-items: center;
+}
+
+.notification-relative-time {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+

@@ -39,6 +39,97 @@ export default function Dashboard({ user, onLogout }) {
   const [selectedResource, setSelectedResource] = useState('Conference room B2 - Tue, 7 Jul')
   const [showNewBookingModal, setShowNewBookingModal] = useState(false)
 
+  // Transfer screen states
+  const [transferAsset, setTransferAsset] = useState('AF-0114 - Dell laptop')
+  const [fromEmpName, setFromEmpName] = useState('Priya Shah')
+  const [toEmpName, setToEmpName] = useState('')
+  const [transferReason, setTransferReason] = useState('')
+  const [transferSuccessMsg, setTransferSuccessMsg] = useState('')
+  const [isAllocated, setIsAllocated] = useState(true)
+  const [allocatedUser, setAllocatedUser] = useState('Priya shah (Engineering)')
+
+  // Asset history state map
+  const [histories, setHistories] = useState({
+    'AF-0114 - Dell laptop': [
+      { date: 'Mar 12', desc: 'Allocated to Priya shah - Engineering' },
+      { date: 'Jan 04', desc: 'Returned by Arjun Nair - condition: good' }
+    ],
+    'AF-0088 - iPad Pro': [
+      { date: 'May 10', desc: 'Allocated to Marcus V. - Facilities' }
+    ],
+    'AF-0062 - Projector': [
+      { date: 'Feb 15', desc: 'Returned by Alex Chen - condition: good' }
+    ]
+  })
+
+  // Handle asset dropdown change
+  const handleAssetChange = (asset) => {
+    setTransferAsset(asset)
+    setTransferSuccessMsg('')
+    setToEmpName('')
+    setTransferReason('')
+    
+    if (asset === 'AF-0114 - Dell laptop') {
+      setIsAllocated(true)
+      setFromEmpName('Priya Shah')
+      setAllocatedUser('Priya shah (Engineering)')
+    } else if (asset === 'AF-0088 - iPad Pro') {
+      setIsAllocated(true)
+      setFromEmpName('Marcus V.')
+      setAllocatedUser('Marcus V. (Facilities)')
+    } else {
+      setIsAllocated(false)
+      setFromEmpName('')
+      setAllocatedUser('')
+    }
+  }
+
+  // Handle transfer form submit
+  const handleTransferSubmit = (e) => {
+    e.preventDefault()
+    if (!toEmpName || !transferReason) return
+
+    const newEvent = {
+      date: 'Jul 12',
+      desc: `Transfer requested to ${toEmpName} - Reason: ${transferReason}`
+    }
+
+    setHistories(prev => ({
+      ...prev,
+      [transferAsset]: [newEvent, ...(prev[transferAsset] || [])]
+    }))
+
+    // Also add to dashboard activities list to show integration!
+    const newActivity = {
+      id: Date.now(),
+      text: `Transfer request: ${transferAsset} from ${fromEmpName} to ${toEmpName}`,
+      time: 'Just now',
+      type: 'booking'
+    }
+    setActivities(prev => [newActivity, ...prev])
+
+    setTransferSuccessMsg(`Transfer request submitted successfully.`)
+    setToEmpName('')
+    setTransferReason('')
+  }
+
+  // Screen 10 Notifications states
+  const [notifFilter, setNotifFilter] = useState('All')
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: 'Laptop AF-0014 assigned to Priya shah', category: 'Bookings', time: '2m ago', color: '#4472c4', checked: false },
+    { id: 2, text: 'Maintenance request AF-0055 approved', category: 'Approvals', time: '18m ago', color: '#70ad47', checked: false },
+    { id: 3, text: 'Booking confirmed : Room B2 : 2:00 to 3:00 PM', category: 'Bookings', time: '1h ago', color: '#4472c4', checked: false },
+    { id: 4, text: 'Transfer approved : AF-0033 to facilities dept', category: 'Approvals', time: '3h ago', color: '#70ad47', checked: false },
+    { id: 5, text: 'Overdue return : AF-0021 was due 3 days ago', category: 'Alerts', time: '1d ago', color: '#ed7d31', checked: false },
+    { id: 6, text: 'audit discrepancy flagged : AF-0088 damaged', category: 'Alerts', time: '2d ago', color: '#ff0000', checked: false }
+  ])
+
+  const handleToggleNotifChecked = (id) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, checked: !n.checked } : n
+    ))
+  }
+
   // Booking list for the calendar timeline
   const [bookings, setBookings] = useState([
     {
@@ -746,6 +837,109 @@ export default function Dashboard({ user, onLogout }) {
                 </button>
               </div>
             </div>
+          ) : activeMenu === 'Allocation & Transfer' ? (
+            <div className="transfer-view-container">
+              {/* Asset selector dropdown */}
+              <div className="form-group-wire" style={{ textAlign: 'left', marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '13px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Asset</label>
+                <select 
+                  value={transferAsset}
+                  onChange={(e) => handleAssetChange(e.target.value)}
+                  style={{ fontSize: '14.5px', padding: '10px' }}
+                >
+                  <option value="AF-0114 - Dell laptop">AF-0114 - Dell laptop</option>
+                  <option value="AF-0088 - iPad Pro">AF-0088 - iPad Pro</option>
+                  <option value="AF-0062 - Projector">AF-0062 - Projector</option>
+                </select>
+              </div>
+
+              {/* Blocked allocation banner */}
+              {isAllocated && (
+                <div className="transfer-blocked-alert">
+                  <div className="transfer-blocked-alert-title">
+                    Already Allocated to {allocatedUser}
+                  </div>
+                  <div className="transfer-blocked-alert-body">
+                    Direct re-allocation is blocked - submit a transfer request below
+                  </div>
+                </div>
+              )}
+
+              {/* Transfer Request Area */}
+              <section style={{ background: '#ffffff', border: '1.5px solid var(--border-color)', borderRadius: 'var(--border-radius)', padding: '24px', boxShadow: 'var(--box-shadow)' }}>
+                <h2 className="transfer-section-title">Transfer Request</h2>
+                
+                {transferSuccessMsg && (
+                  <div className="org-status-oval active" style={{ display: 'block', padding: '10px 14px', borderRadius: '6px', textAlign: 'left', marginBottom: '16px', border: '1px solid #70ad47', background: '#e2f0d9' }}>
+                    <strong>Success:</strong> {transferSuccessMsg}
+                  </div>
+                )}
+
+                <form onSubmit={handleTransferSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className="transfer-grid-row">
+                    <div className="form-group-wire">
+                      <label>From</label>
+                      <input 
+                        type="text" 
+                        value={isAllocated ? fromEmpName : 'Not Allocated'} 
+                        disabled 
+                        style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}
+                      />
+                    </div>
+                    <div className="form-group-wire">
+                      <label>To</label>
+                      <select 
+                        value={toEmpName}
+                        onChange={(e) => setToEmpName(e.target.value)}
+                        required={isAllocated}
+                        disabled={!isAllocated}
+                      >
+                        <option value="">Select Employee....</option>
+                        {employees
+                          .filter(emp => emp.name !== fromEmpName)
+                          .map((emp, index) => (
+                            <option key={index} value={emp.name}>{emp.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group-wire" style={{ marginBottom: '16px' }}>
+                    <label>Reason</label>
+                    <textarea 
+                      rows="4"
+                      value={transferReason}
+                      onChange={(e) => setTransferReason(e.target.value)}
+                      placeholder="Specify reason..."
+                      required={isAllocated}
+                      disabled={!isAllocated}
+                    ></textarea>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="transfer-submit-btn"
+                    disabled={!isAllocated}
+                    style={{ opacity: isAllocated ? 1 : 0.5, cursor: isAllocated ? 'pointer' : 'not-allowed' }}
+                  >
+                    Submit Request
+                  </button>
+                </form>
+              </section>
+
+              {/* Allocation History */}
+              <section className="history-section-wire">
+                <h3>Allocation history</h3>
+                <div className="history-divider"></div>
+                <ul className="history-list">
+                  {(histories[transferAsset] || []).map((item, index) => (
+                    <li key={index} className="history-item">
+                      {item.date} - {item.desc}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
           ) : activeMenu === 'Audit' ? (
             <div className="audit-view-container">
               {/* Q3 audit cycle info box matching Screen 8 */}
@@ -826,6 +1020,50 @@ export default function Dashboard({ user, onLogout }) {
                 </div>
               )}
 
+            </div>
+          ) : activeMenu === 'Notifications' ? (
+            <div className="notifications-view-container">
+              {/* Filter Tabs matching Screen 10 */}
+              <div className="notif-filter-bar">
+                {['All', 'Alerts', 'Approvals', 'Bookings'].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`notif-filter-btn ${notifFilter === tab ? 'active' : ''}`}
+                    onClick={() => setNotifFilter(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* List of Notifications */}
+              <div className="notifications-list-card">
+                {notifications
+                  .filter(n => notifFilter === 'All' || n.category === notifFilter)
+                  .map((notif) => (
+                    <div key={notif.id} className="notification-row-item">
+                      <div className="notification-left-block">
+                        <input
+                          type="checkbox"
+                          className="notification-check-box"
+                          checked={notif.checked || false}
+                          onChange={() => handleToggleNotifChecked(notif.id)}
+                          title="Mark as read"
+                        />
+                        <div 
+                          className="notification-status-color-square" 
+                          style={{ backgroundColor: notif.color }}
+                        ></div>
+                        <span className={`notification-message-text ${notif.checked ? 'read' : ''}`}>
+                          {notif.text}
+                        </span>
+                      </div>
+                      <div className="notification-right-block">
+                        <span className="notification-relative-time">{notif.time}</span>
+                      </div>
+                    </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="fallback-wire-container">
