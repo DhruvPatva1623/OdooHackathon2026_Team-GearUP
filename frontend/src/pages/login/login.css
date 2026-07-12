@@ -1,0 +1,145 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f7f7fb;
+}
+
+.login-page{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.logo-box{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo{
+    width:45px;
+    height:45px;
+    background:#ede8ff;
+    color:#6b21ff;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:auto;
+    font-weight:bold;
+}
+
+.logo-box h1{
+    margin-top:12px;
+    letter-spacing:4px;
+    color:#444;
+    font-size:28px;
+}
+
+.logo-box p{
+    color:#888;
+    font-size:13px;
+    margin-top:6px;
+}
+
+.login-card{
+    width:380px;
+    background:white;
+    padding:30px;
+    border-radius:14px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.input-group{
+    margin-bottom:18px;
+}
+
+.input-group label{
+    font-size:11px;
+    color:#666;
+    text-transform:uppercase;
+}
+
+.input-group input{
+    width:100%;
+    margin-top:8px;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    outline:none;
+}
+
+.password-header{
+    display:flex;
+    justify-content:space-between;
+}
+
+.password-header span{
+    font-size:11px;
+    color:#7b2cff;
+    cursor:pointer;
+}
+
+.login-btn{
+    width:100%;
+    border:none;
+    padding:13px;
+    background:#6d28d9;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.login-btn:hover{
+    background:#5b21b6;
+}
+
+.divider{
+    margin:28px 0;
+    border-top:1px solid #eee;
+}
+
+.new-user{
+    text-align:center;
+    color:#666;
+    font-size:14px;
+}
+
+.info-box{
+    background:#fafafa;
+    border:1px solid #ececec;
+    padding:12px;
+    margin:18px 0;
+    border-radius:6px;
+    font-size:12px;
+    color:#666;
+    text-align:center;
+    line-height:18px;
+}
+
+.request-btn{
+    width:100%;
+    padding:12px;
+    background:white;
+    border:1px solid #ddd;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.request-btn:hover{
+    background:#f7f7f7;
+}
+
+.footer{
+    margin-top:30px;
+    color:#999;
+    font-size:12px;
+}
